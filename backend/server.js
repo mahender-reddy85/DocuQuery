@@ -68,7 +68,27 @@ app.post('/api/generate', async (req, res) => {
     }
 
     const json = await response.json();
-    const text = json.candidates?.[0]?.content?.parts?.[0]?.text || null;
+
+    // Robust extraction of text from multiple possible Gemini response shapes
+    let text = null;
+
+    // Case 1: Standard Gemini structure
+    if (json.candidates?.[0]?.content?.parts?.[0]?.text) {
+      text = json.candidates[0].content.parts[0].text;
+    }
+    // Case 2: content[] instead of content.parts[]
+    else if (json.candidates?.[0]?.content?.[0]?.text) {
+      text = json.candidates[0].content[0].text;
+    }
+    // Case 3: output property
+    else if (json.candidates?.[0]?.output) {
+      text = json.candidates[0].output;
+    }
+    // Case 4: model returned inline text
+    else if (json.text) {
+      text = json.text;
+    }
+
     return res.json({ text });
 
   } catch (err) {
