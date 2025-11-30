@@ -369,37 +369,24 @@ DOCUMENT:
 ${extractedText}
 \`\`\``;
 
-    // Send request to local server-side proxy which holds the API key securely.
-    const localPayload = {
-        userQuery,
-        systemPrompt,
-        extractedText,
-        model: MODEL,
-        generationConfig: { temperature: 0.1 }
-    };
-
-    try {
-        const response = await fetchWithRetry(API_ENDPOINT, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(localPayload)
+    // Send request to remote secure proxy endpoint
+    return fetch("https://docuquery-b68i.onrender.com/api/generate", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            userQuery,
+            systemPrompt,
+            extractedText
+        })
+    })
+        .then(res => res.json())
+        .then(data => data.text || "Sorry, I received an empty response from the AI.")
+        .catch(err => {
+            console.error("Gemini API Error:", err);
+            return `An error occurred while communicating with the AI: ${err.message}`;
         });
-
-        if (!response.ok) {
-            const errorBody = await response.text();
-            throw new Error(`Proxy error! Status: ${response.status}, Details: ${errorBody}`);
-        }
-
-        const result = await response.json();
-        // Proxy returns { text: '...' } on success
-        if (!result || !result.text) {
-            return "Sorry, I received an empty or malformed response from the AI proxy.";
-        }
-        return result.text;
-    } catch (error) {
-        console.error("Gemini Proxy Error:", error);
-        return `An error occurred while communicating with the AI proxy: ${error.message}`;
-    }
 }
 
 
