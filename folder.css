@@ -571,6 +571,37 @@ body.dark {
     gap: 2.5rem;
 }
 
+/* Responsive padding */
+.p-4 {
+    padding: 1rem;
+}
+.sm\:p-6 {
+    padding: 1.5rem;
+}
+.lg\:p-8 {
+    padding: 2rem;
+}
+
+/* Mobile margin bottom for stacking */
+.mb-8 {
+    margin-bottom: 2rem;
+}
+.lg\:mb-0 {
+    margin-bottom: 0;
+}
+
+/* Responsive height */
+.h-full {
+    height: 100%;
+}
+.min-h-\[85vh\] {
+    min-height: 85vh;
+}
+
+.lg\:gap-10 {
+    gap: 2.5rem;
+}
+
 /* Document extraction panel */
 .shadow-xl {
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
