@@ -1,0 +1,3 @@
+- [x] Extract CSS from folder.html and create folder.css
+- [x] Extract JavaScript from folder.html and create folder.js (as a module)
+- [x] Update folder.html to remove <style> and <script> blocks, add <link> to folder.css and <script> to folder.js
