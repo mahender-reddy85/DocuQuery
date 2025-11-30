@@ -1,4 +1,4 @@
-# DocuQuery Lite: Q&A
+# DocuQuery: Q&A
 
 An intelligent document processing and question-answering application that lets you upload documents (PDF, DOCX, TXT) and ask questions about their content using AI-powered responses grounded in the document text.
 
