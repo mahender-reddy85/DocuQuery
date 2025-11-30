@@ -29,6 +29,15 @@ app.get('/api/generate', (req, res) => {
   });
 });
 
+// Root and health endpoints to avoid 404s and help monitoring
+app.get('/', (req, res) => {
+  res.status(200).send('DocuQuery backend is running. Use POST /api/generate for AI requests.');
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', env: process.env.NODE_ENV || 'production' });
+});
+
 app.post('/api/generate', async (req, res) => {
   try {
     const { userQuery, systemPrompt, extractedText, model, generationConfig } = req.body || {};
