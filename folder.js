@@ -369,24 +369,26 @@ DOCUMENT:
 ${extractedText}
 \`\`\``;
 
-    // Send request to remote secure proxy endpoint
-    return fetch("https://docuquery-b68i.onrender.com/api/generate", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            userQuery,
-            systemPrompt,
-            extractedText
-        })
-    })
-        .then(res => res.json())
-        .then(data => data.text || "Sorry, I received an empty response from the AI.")
-        .catch(err => {
-            console.error("Gemini API Error:", err);
-            return `An error occurred while communicating with the AI: ${err.message}`;
+    try {
+        const response = await fetch("https://docuquery-b68i.onrender.com/api/generate", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                userQuery: userQuery,
+                systemPrompt: systemPrompt,
+                extractedText: extractedText,
+                model: "gemini-2.0-flash"
+            })
         });
+
+        const result = await response.json();
+        return result.text || "Sorry, I received an empty response from the AI.";
+    } catch (err) {
+        console.error("Gemini API Error:", err);
+        return `An error occurred while communicating with the AI: ${err.message}`;
+    }
 }
 
 
