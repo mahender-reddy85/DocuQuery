@@ -124,6 +124,9 @@ body.dark {
 .text-indigo-600 {
     color: #4f46e5;
 }
+.dark .text-indigo-600 {
+    color: #a5b4fc;
+}
 .mr-2 {
     margin-right: 0.5rem;
 }
@@ -235,6 +238,9 @@ body.dark {
 .text-indigo-500 {
     color: #6366f1;
 }
+.dark .text-indigo-500 {
+    color: #a5b4fc;
+}
 .font-semibold {
     font-weight: 600;
 }
@@ -281,8 +287,55 @@ body.dark {
 .text-red-500 {
     color: #ef4444;
 }
+.dark .text-red-500 {
+    color: #fca5a5;
+}
 .p-6 {
     padding: 1.5rem;
+}
+
+/* Additional text color utilities */
+.text-gray-800 {
+    color: #1f2937;
+}
+.dark .text-gray-800 {
+    color: #e5e7eb;
+}
+.text-gray-200 {
+    color: #e5e7eb;
+}
+.dark .text-gray-200 {
+    color: #1f2937;
+}
+.text-indigo-700 {
+    color: #4338ca;
+}
+.dark .text-indigo-700 {
+    color: #a5b4fc;
+}
+.text-indigo-300 {
+    color: #a5b4fc;
+}
+.dark .text-indigo-300 {
+    color: #4338ca;
+}
+.bg-gray-50 {
+    background-color: #f9fafb;
+}
+.dark .bg-gray-50 {
+    background-color: #374151;
+}
+.bg-gray-100 {
+    background-color: #f3f4f6;
+}
+.dark .bg-gray-100 {
+    background-color: #374151;
+}
+.bg-gray-700 {
+    background-color: #374151;
+}
+.dark .bg-gray-700 {
+    background-color: #111827;
 }
 
 .text-3xl {
@@ -305,8 +358,25 @@ body.dark {
 .text-gray-500 {
     color: #6b7280;
 }
+.dark .text-gray-500-dark {
+    color: #d1d5db;
+}
 .mb-10 {
     margin-bottom: 2.5rem;
+}
+
+/* Text color utilities */
+.text-gray-900 {
+    color: #111827;
+}
+.dark .text-gray-900 {
+    color: #f3f4f6;
+}
+.text-gray-100 {
+    color: #f3f4f6;
+}
+.dark .text-gray-100 {
+    color: #111827;
 }
 
 /* Drop zone styles */
@@ -375,6 +445,40 @@ body.dark {
 }
 .text-red-500 {
     color: #ef4444;
+}
+
+.dark .bg-gray-700 {
+    background-color: #111827;
+}
+
+/* Border color utilities */
+.border-gray-200 {
+    border-color: #e5e7eb;
+}
+.dark .border-gray-200 {
+    border-color: #4b5563;
+}
+.border-gray-600 {
+    border-color: #4b5563;
+}
+.dark .border-gray-600 {
+    border-color: #e5e7eb;
+}
+
+/* Focus states */
+.focus\:ring-indigo-500:focus {
+    --tw-ring-color: #6366f1;
+}
+.focus\:border-indigo-500:focus {
+    border-color: #6366f1;
+}
+
+/* Disabled states */
+.disabled\:bg-gray-100:disabled {
+    background-color: #f3f4f6;
+}
+.dark .disabled\:bg-gray-100:disabled {
+    background-color: #374151;
 }
 
 /* QA Screen styles */
@@ -531,6 +635,9 @@ body.dark {
 }
 .text-gray-400 {
     color: #9ca3af;
+}
+.dark .text-gray-400 {
+    color: #e5e7eb;
 }
 .italic {
     font-style: italic;
