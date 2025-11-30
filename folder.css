@@ -361,6 +361,67 @@ body.dark {
 .dark .text-gray-500-dark {
     color: #d1d5db;
 }
+
+/* Status message colors - Success */
+.text-green-700 {
+    color: #15803d;
+}
+.dark .text-green-700 {
+    color: #86efac;
+}
+.bg-green-50 {
+    background-color: #f0fdf4;
+}
+.dark .bg-green-50 {
+    background-color: #064e3b;
+}
+.border-green-200 {
+    border-color: #bbf7d0;
+}
+.dark .border-green-200 {
+    border-color: #166534;
+}
+
+/* Status message colors - Error */
+.text-red-700 {
+    color: #b91c1c;
+}
+.dark .text-red-700 {
+    color: #fca5a5;
+}
+.bg-red-50 {
+    background-color: #fef2f2;
+}
+.dark .bg-red-50 {
+    background-color: #7f1d1d;
+}
+.border-red-200 {
+    border-color: #fecaca;
+}
+.dark .border-red-200 {
+    border-color: #991b1b;
+}
+
+/* Status message colors - Warning */
+.text-yellow-700 {
+    color: #b45309;
+}
+.dark .text-yellow-700 {
+    color: #fcd34d;
+}
+.bg-yellow-50 {
+    background-color: #fffbeb;
+}
+.dark .bg-yellow-50 {
+    background-color: #78350f;
+}
+.border-yellow-200 {
+    border-color: #fef08a;
+}
+.dark .border-yellow-200 {
+    border-color: #92400e;
+}
+
 .mb-10 {
     margin-bottom: 2.5rem;
 }
