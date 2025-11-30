@@ -72,7 +72,7 @@ window.switchScreen = function(targetId) {
 
 // Gemini API Configuration
 const API_KEY = "AIzaSyDGmBHdy7kcgGJyOpWXx7SZjbQJyr5hetg";
-const MODEL = 'gemini-1.5-flash';
+const MODEL = 'gemini-2.0-flash';
 const API_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
 
 // Global variables (now scoped within the module)
