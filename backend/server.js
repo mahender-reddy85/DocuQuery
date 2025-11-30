@@ -1,8 +1,4 @@
 const express = require('express');
-const dotenv = require('dotenv');
-
-// Load environment variables from .env when present
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
