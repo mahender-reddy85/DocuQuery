@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocuQuery Lite: AI Grounded Q&A</title>
+    <link rel="stylesheet" href="./folder.css">
+</head>
+<body>
+
+    <!-- Header shared by both screens -->
+    <header id="mainHeader" class="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-10">
+        <!-- Branding Container (to be hidden on QA screen) -->
+        <div id="brandingContainer" class="text-2xl font-bold text-gray-900 flex items-center dark:text-gray-100">
+            <svg class="w-7 h-7 text-indigo-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m-5 4h8a2 2 0 002-2V7a2 2 0 00-2-2H9a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            DocuQuery <span class="text-indigo-600">Lite</span>
+        </div>
+
+        <!-- Theme Toggle Button -->
+        <button id="themeToggle" aria-label="Toggle theme" class="p-2 rounded-full text-gray-500 hover:text-indigo-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:text-indigo-300 dark:hover:bg-gray-700 transition duration-200">
+            <!-- Sun icon (for light mode) -->
+            <svg id="sunIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <!-- Moon icon (for dark mode) -->
+            <svg id="moonIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        </button>
+    </header>
+
+    <!-- 1. Initial Upload Screen (matching the provided UI) -->
+    <div id="initialScreen" class="full-screen-center">
+        <!-- FIX: Added dark:bg-gray-900 to ensure the background covers the whole area if the drop zone is small -->
+        <div class="max-w-xl text-center p-6 rounded-2xl bg-white dark:bg-gray-900">
+            <!-- Reduced heading size from text-4xl to text-3xl -->
+            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight mb-4 dark:text-gray-100">
+                Chat with your documents
+            </h1>
+            <p class="text-lg text-gray-500 mb-10 dark:text-gray-400">
+                Upload a PDF, DOCX, or TXT. We'll extract the text securely in your browser and let you ask questions instantly.
+            </p>
+
+            <!-- Drop Zone Area -->
+            <div id="dropZone" class="p-12 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer hover:border-indigo-400 hover:bg-gray-50 transition-colors duration-300 bg-white dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700" onclick="document.getElementById('fileInputHidden').click()">
+                <div id="uploadStatus" class="flex flex-col items-center">
+                    <svg class="w-12 h-12 text-indigo-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    <p class="text-lg font-semibold text-gray-700 dark:text-gray-300">Upload your document</p>
+                    <p class="text-sm text-gray-500 mb-6 dark:text-gray-400">Drag & drop or click to browse</p>
+
+                    <!-- Accepted file types display -->
+                    <div class="flex flex-wrap justify-center text-sm text-gray-400 font-medium space-x-3 dark:text-gray-500">
+                        <span class="inline-flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m-5 4h8a2 2 0 002-2V7a2 2 0 00-2-2H9a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>PDF</span>
+                        <span class="inline-flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m-5 4h8a2 2 0 002-2V7a2 2 0 00-2-2H9a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>DOCX/TXT</span>
+                        <span class="inline-flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m-5 4h8a2 2 0 002-2V7a2 2 0 00-2-2H9a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>PPTX</span>
+                    </div>
+
+                    <!-- Progress/Error display within the drop zone -->
+                    <div id="dropZoneStatus" class="mt-4 text-sm font-medium text-red-500 hidden"></div>
+                </div>
+            </div>
+
+            <!-- Hidden File Input for click browsing (Image extensions removed) -->
+            <input type="file" id="fileInputHidden" accept=".pdf,.docx,.txt" aria-label="Upload document" class="hidden">
+        </div>
+    </div>
+
+    <script type="module" src="folder.js"></script>
+</body>
+</html>
