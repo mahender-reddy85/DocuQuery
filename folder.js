@@ -35,15 +35,6 @@ window.switchScreen = function(targetId) {
     const mainHeader = document.getElementById('mainHeader'); // Header element
     const dropZoneStatus = document.getElementById('dropZoneStatus');
 
-    // Define utility functions needed here (copied from module scope)
-    function toggleChatInputs(enable) {
-        const questionInput = document.getElementById('questionInput');
-        const submitQuestionButton = document.getElementById('submitQuestion');
-        questionInput.disabled = !enable;
-        submitQuestionButton.disabled = !enable;
-    }
-
-
     if (targetId === 'initialScreen') {
         qaScreen.classList.add('hidden');
         initialScreen.classList.remove('hidden');
