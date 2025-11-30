@@ -136,13 +136,16 @@ All text and UI elements have proper dark mode variants:
 - **Input Fields** - Properly styled for both themes
 - **Borders & Shadows** - Adjusted for visibility in both modes
 
-## API Configuration
+## API Configuration (Secure)
 
-The application uses Google's Gemini API:
-- **Model**: `gemini-2.0-flash` (latest available)
-- **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`
-- **Temperature**: 0.1 (low creativity for grounded responses)
-- **API Key**: Configured in `folder.js` (replace with your own key)
+This project no longer stores API keys in client-side code. Client-side keys are easily discovered in public repositories and are insecure. Instead, run a small server-side proxy that keeps the API key in an environment variable and forwards requests to the Gemini API.
+
+- **Model**: `gemini-2.0-flash` (configurable)
+- **Proxy endpoint**: `POST /api/generate` (provided by `server.js`)
+- **Temperature**: configurable via the request payload
+- **API Key storage**: `GEMINI_API_KEY` in a local `.env` file or environment variable (do NOT commit `.env`)
+
+See `server.js` and `.env.example` for details.
 
 ## Browser Compatibility
 
@@ -151,12 +154,28 @@ The application uses Google's Gemini API:
 - **Safari** - Full support
 - **Mobile Browsers** - Full support with responsive design
 
-## Getting Started
+## Getting Started (Local, secure API key)
 
 1. Clone or download this repository
-2. Replace the API key in `folder.js` with your own Gemini API key
-3. Open `index.html` in a modern web browser
-4. Upload a document and start asking questions
+2. Copy `.env.example` to `.env` and add your real key:
+
+```powershell
+copy .env.example .env
+# then edit .env and fill GEMINI_API_KEY
+```
+
+3. Install dependencies and start the server (Node 18+ recommended):
+
+```powershell
+npm install express dotenv
+npm start
+```
+
+4. Open `index.html` in your browser (or serve the static files from a web server). The frontend will call the local proxy at `http://localhost:3000/api/generate` to get AI responses.
+
+5. To change the port, set `PORT` environment variable before starting the server.
+
+6. IMPORTANT: Revoke the exposed API key immediately (see Security section below) and rotate to a new key stored in `.env`.
 
 ## Notes
 
@@ -164,6 +183,38 @@ The application uses Google's Gemini API:
 - All processing happens client-side for maximum privacy
 - The AI model is specifically configured to only use document content for answers
 - Local storage is used for theme preference persistence
+
+## Security & Key Rotation
+
+- If an API key was committed, revoke it immediately via the Google Cloud Console and create a new key.
+- To remove the key from your git history, use one of the following (choose one):
+
+  - Using BFG (recommended for large repos):
+
+    ```powershell
+    # Replace 'YOUR_SECRET' with the actual secret string
+    bfg --delete-files .env
+    bfg --replace-text replacements.txt
+    git reflog expire --expire=now --all
+    git gc --prune=now --aggressive
+    ```
+
+  - Using git filter-repo (preferred modern tool):
+
+    ```powershell
+    # Install git-filter-repo then run (example removing a key literal)
+    git filter-repo --invert-paths --paths .env
+    ```
+
+  - Or using git filter-branch (legacy):
+
+    ```powershell
+    git filter-branch --force --index-filter "git rm --cached --ignore-unmatch path/to/file" --prune-empty --tag-name-filter cat -- --all
+    ```
+
+- After rewriting history, you'll need to force-push the cleaned branch: `git push --force origin main` and ask collaborators to re-clone.
+
+Always assume any exposed key is compromised and rotate it immediately.
 
 ## Version
 

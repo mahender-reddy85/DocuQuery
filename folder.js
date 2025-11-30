@@ -71,9 +71,11 @@ window.switchScreen = function(targetId) {
 // --- 1. CONFIGURATION AND IMPORTS ---
 
 // Gemini API Configuration
-const API_KEY = "AIzaSyBx6H1etp7HwFNh-8xCeXQtOlfiABnPajk";
+// SECURITY: Do NOT store API keys in client-side code. The frontend will call
+// a local server-side proxy at `/api/generate` which must securely hold the
+// actual API key in an environment variable (see server.js and README.md).
 const MODEL = 'gemini-2.0-flash';
-const API_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+const API_ENDPOINT = '/api/generate'; // local proxy endpoint
 
 // Global variables (now scoped within the module)
 let extractedText = null;
@@ -367,41 +369,36 @@ DOCUMENT:
 ${extractedText}
 \`\`\``;
 
-    const payload = {
-        contents: [{ parts: [{ text: userQuery }] }],
-        systemInstruction: {
-            parts: [{ text: systemPrompt }]
-        },
-        // Optional: Reduce model creativity since we want strict grounding
-        generationConfig: {
-            temperature: 0.1
-        }
-    };
-
-    const options = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+    // Send request to local server-side proxy which holds the API key securely.
+    const localPayload = {
+        userQuery,
+        systemPrompt,
+        extractedText,
+        model: MODEL,
+        generationConfig: { temperature: 0.1 }
     };
 
     try {
-        const response = await fetchWithRetry(API_ENDPOINT, options);
+        const response = await fetchWithRetry(API_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(localPayload)
+        });
+
         if (!response.ok) {
-            const errorBody = await response.json();
-            throw new Error(`HTTP error! Status: ${response.status}, Details: ${JSON.stringify(errorBody)}`);
+            const errorBody = await response.text();
+            throw new Error(`Proxy error! Status: ${response.status}, Details: ${errorBody}`);
         }
 
         const result = await response.json();
-        const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-
-        if (!text) {
-            return "Sorry, I received an empty or malformed response from the AI.";
+        // Proxy returns { text: '...' } on success
+        if (!result || !result.text) {
+            return "Sorry, I received an empty or malformed response from the AI proxy.";
         }
-        return text;
-
+        return result.text;
     } catch (error) {
-        console.error("Gemini API Error:", error);
-        return `An error occurred while communicating with the AI: ${error.message}`;
+        console.error("Gemini Proxy Error:", error);
+        return `An error occurred while communicating with the AI proxy: ${error.message}`;
     }
 }
 
