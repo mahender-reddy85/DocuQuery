@@ -71,11 +71,9 @@ window.switchScreen = function(targetId) {
 // --- 1. CONFIGURATION AND IMPORTS ---
 
 // Gemini API Configuration
-// SECURITY: Do NOT store API keys in client-side code. The frontend will call
-// a local server-side proxy at `/api/generate` which must securely hold the
-// actual API key in an environment variable (see server.js and README.md).
+// SECURITY: Do NOT store API keys in client-side code.
+// API calls are made to a secure remote proxy endpoint.
 const MODEL = 'gemini-2.0-flash';
-const API_ENDPOINT = '/api/generate'; // local proxy endpoint
 
 // Global variables (now scoped within the module)
 let extractedText = null;
@@ -141,28 +139,6 @@ function displayDropZoneStatus(message, type) {
     dropZoneStatus.classList.remove('hidden');
 }
 
-
-/**
- * Generic fetch wrapper with exponential backoff for retries.
- */
-async function fetchWithRetry(url, options, maxRetries = 5) {
-    for (let i = 0; i < maxRetries; i++) {
-        try {
-            const response = await fetch(url, options);
-            if (response.status !== 429 && response.status < 500) {
-                return response; // Success or non-retryable error
-            }
-            // If 429 (Too Many Requests) or 5xx, retry with delay
-            console.log(`[Retry] Request failed with status ${response.status}. Retrying in ${Math.pow(2, i)}s...`);
-            await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
-        } catch (error) {
-            if (i === maxRetries - 1) throw error; // Re-throw on last attempt
-            console.log(`[Retry] Request failed with error: ${error.message}. Retrying in ${Math.pow(2, i)}s...`);
-            await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
-        }
-    }
-    throw new Error("API request failed after multiple retries.");
-}
 
 /**
  * Converts a File or Blob into an ArrayBuffer.

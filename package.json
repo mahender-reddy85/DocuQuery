@@ -1,10 +1,9 @@
 {
-  "name": "folder",
+  "name": "docuquery-frontend",
   "version": "1.0.0",
-  "description": "",
-  "main": "folder.js",
+  "description": "DocuQuery - AI-powered document Q&A application",
+  "main": "index.html",
   "scripts": {
-    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
