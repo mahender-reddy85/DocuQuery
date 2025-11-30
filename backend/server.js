@@ -20,6 +20,15 @@ if (!process.env.GEMINI_API_KEY) {
   console.warn('Warning: GEMINI_API_KEY is not set. The proxy will fail without it.');
 }
 
+// Helpful GET handler for diagnostics: return a clear message instead of 404
+app.get('/api/generate', (req, res) => {
+  console.warn('Received GET /api/generate - this endpoint expects POST only.');
+  res.status(405).json({
+    error: 'Method Not Allowed',
+    message: 'This endpoint accepts POST requests with JSON body. Use POST to https://docuquery-b68i.onrender.com/api/generate'
+  });
+});
+
 app.post('/api/generate', async (req, res) => {
   try {
     const { userQuery, systemPrompt, extractedText, model, generationConfig } = req.body || {};
