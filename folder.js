@@ -71,7 +71,7 @@ window.switchScreen = function(targetId) {
 // --- 1. CONFIGURATION AND IMPORTS ---
 
 // Gemini API Configuration
-const API_KEY = "AIzaSyDGmBHdy7kcgGJyOpWXx7SZjbQJyr5hetg";
+const API_KEY = "AIzaSyBx6H1etp7HwFNh-8xCeXQtOlfiABnPajk";
 const MODEL = 'gemini-2.0-flash';
 const API_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
 
