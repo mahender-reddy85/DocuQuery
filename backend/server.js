@@ -3,14 +3,12 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Simple CORS handling (adjust for production)
-app.use(function(req, res, next) {
+// ----- CORS -----
+app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(204);
-  }
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
   next();
 });
 
@@ -20,80 +18,98 @@ if (!process.env.GEMINI_API_KEY) {
   console.warn('Warning: GEMINI_API_KEY is not set. The proxy will fail without it.');
 }
 
-// Helpful GET handler for diagnostics: return a clear message instead of 404
-app.get('/api/generate', (req, res) => {
-  console.warn('Received GET /api/generate - this endpoint expects POST only.');
-  res.status(405).json({
-    error: 'Method Not Allowed',
-    message: 'This endpoint accepts POST requests with JSON body. Use POST to https://docuquery-b68i.onrender.com/api/generate'
-  });
-});
-
-// Root and health endpoints to avoid 404s and help monitoring
+// ----- Optional Diagnostics -----
 app.get('/', (req, res) => {
-  res.status(200).send('DocuQuery backend is running. Use POST /api/generate for AI requests.');
+  res.send('DocuQuery backend is running. Use POST /api/generate');
 });
 
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', env: process.env.NODE_ENV || 'production' });
+  res.status(200).json({ status: 'ok' });
 });
 
+// Block GET on generate
+app.get('/api/generate', (req, res) => {
+  res.status(405).json({
+    error: 'Method Not Allowed',
+    message: 'Use POST /api/generate with JSON body'
+  });
+});
+
+// ----- MAIN API -----
 app.post('/api/generate', async (req, res) => {
   try {
     const { userQuery, systemPrompt, extractedText, model, generationConfig } = req.body || {};
+    const MODEL = model || 'gemini-2.0-flash';
 
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ error: 'Server misconfiguration: GEMINI_API_KEY not set.' });
     }
 
-    // Build the request body for the Gemini API
-    const MODEL = model || 'gemini-2.0-flash';
-    const API_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`;
+    // Gemini API endpoint
+    const API_ENDPOINT = 
+      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
+    // ----- FIX 1: Proper Gemini request structure -----
     const payload = {
-      contents: [{ parts: [{ text: userQuery || '' }] }],
-      systemInstruction: { parts: [{ text: systemPrompt || `DOCUMENT:\n\n${extractedText || ''}` }] },
-      generationConfig: generationConfig || { temperature: 0.1 }
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: userQuery || "" }]
+        }
+      ],
+      systemInstruction: {
+        role: "system",
+        parts: [{ text: systemPrompt || `DOCUMENT:\n\n${extractedText}` }]
+      },
+      generationConfig: generationConfig || { temperature: 0.3 }
     };
 
+    // ----- Call Gemini -----
     const response = await fetch(API_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
 
+    const raw = await response.text();
+
     if (!response.ok) {
-      const text = await response.text();
-      return res.status(response.status).send(text);
+      return res.status(response.status).send(raw);
     }
 
-    const json = await response.json();
+    const json = JSON.parse(raw);
 
-    // Robust extraction of text from multiple possible Gemini response shapes
+    // ----- FIX 2: Robust extraction (covers ALL formats) -----
     let text = null;
 
-    // Case 1: Standard Gemini structure
+    // Standard response
     if (json.candidates?.[0]?.content?.parts?.[0]?.text) {
       text = json.candidates[0].content.parts[0].text;
     }
-    // Case 2: content[] instead of content.parts[]
+    // Variant: content is array of parts
     else if (json.candidates?.[0]?.content?.[0]?.text) {
       text = json.candidates[0].content[0].text;
     }
-    // Case 3: output property
+    // Variant: output field
     else if (json.candidates?.[0]?.output) {
       text = json.candidates[0].output;
     }
-    // Case 4: model returned inline text
+    // Variant: direct text field
     else if (json.text) {
       text = json.text;
     }
+
+    // Final fallback: force a readable string
+    if (!text) text = "I'm sorry — the model returned no readable text.";
 
     return res.json({ text });
 
   } catch (err) {
     console.error('Proxy error:', err);
-    return res.status(500).json({ error: err.message || 'Unknown error' });
+    return res.status(500).json({
+      error: 'Internal Server Error',
+      message: err.message || 'Unknown backend error'
+    });
   }
 });
 
