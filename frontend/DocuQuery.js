@@ -126,15 +126,45 @@ function displayDropZoneStatus(message, type) {
     dropZoneStatus.classList.remove('hidden');
 }
 
+window.askSuggested = function(query) {
+    if (questionInput && !questionInput.disabled) {
+        questionInput.value = query;
+        if (questionForm) questionForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    }
+};
+
+window.copyToClipboard = function(btn) {
+    const textNode = btn.parentElement.parentElement.querySelector('.message-text');
+    if (textNode) {
+        navigator.clipboard.writeText(textNode.innerText);
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="text-emerald-500 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> Copied</span>';
+        setTimeout(() => btn.innerHTML = originalText, 2000);
+    }
+};
+
 function scrollChatToBottom() {
     chatHistory.scrollTop = chatHistory.scrollHeight;
 }
 
 function addChatMessage(text, role) {
     const messageDiv = document.createElement('div');
-    messageDiv.classList.add('max-w-[85%]', 'whitespace-pre-wrap');
-    messageDiv.classList.add(role === 'user' ? 'user-query' : 'ai-response');
-    messageDiv.innerHTML = text.replace(/\n/g, '<br>');
+    messageDiv.classList.add('flex', 'flex-col', 'max-w-[85%]', role === 'user' ? 'self-end' : 'self-start');
+    
+    const bubble = document.createElement('div');
+    bubble.classList.add('whitespace-pre-wrap');
+    bubble.classList.add(role === 'user' ? 'user-query' : 'ai-response');
+    
+    if (role === 'ai') {
+        bubble.innerHTML = `<div class="message-text">${text.replace(/\n/g, '<br>')}</div>
+        <div class="flex border-t border-slate-200 dark:border-slate-700/50 pt-2 mt-3 justify-end items-center">
+            <button onclick="window.copyToClipboard(this)" class="text-[11px] font-bold text-indigo-500 hover:text-indigo-600 transition-colors px-2 py-0.5 rounded cursor-pointer">Copy Answer</button>
+        </div>`;
+    } else {
+        bubble.innerHTML = `<div class="message-text">${text.replace(/\n/g, '<br>')}</div>`;
+    }
+    
+    messageDiv.appendChild(bubble);
     chatHistory.appendChild(messageDiv);
     scrollChatToBottom();
 }
@@ -144,11 +174,17 @@ function toggleChatLoading(isLoading) {
     submitQuestionButton.disabled = isLoading;
     chatLoading.classList.toggle('hidden', !isLoading);
     sendIcon.classList.toggle('hidden', isLoading);
+    
     if (isLoading) {
         const placeholder = document.createElement('div');
         placeholder.id = 'aiPlaceholder';
-        placeholder.classList.add('ai-response');
-        placeholder.innerHTML = 'Thinking...';
+        placeholder.classList.add('flex', 'flex-col', 'max-w-[85%]', 'self-start');
+        
+        const bubble = document.createElement('div');
+        bubble.classList.add('ai-response');
+        bubble.innerHTML = 'Thinking...';
+        
+        placeholder.appendChild(bubble);
         chatHistory.appendChild(placeholder);
         scrollChatToBottom();
     } else {
@@ -336,8 +372,22 @@ async function processFile(file) {
 // --- API ---
 
 async function callGeminiApi(userQuery) {
-    const systemPrompt = `You are an expert Q&A system. Your sole source of information is the document provided. You MUST only answer the user's question using the text found in the document provided within the triple backticks. Do not use any external knowledge.
+    const modeToggle = document.getElementById('modeToggle');
+    const mode = modeToggle ? modeToggle.value : 'standard';
+    
+    let modeInstruction = "";
+    if (mode === 'student') {
+        modeInstruction = "Explain the answer simply and clearly, as if explaining to a 5-year-old or a beginner student. Use simple analogies if helpful. ";
+    } else if (mode === 'detailed') {
+        modeInstruction = "Provide a highly detailed, comprehensive, and exhaustive technical analysis of the answer. ";
+    }
+
+    const systemPrompt = `You are an expert Q&A system. Your sole source of information is the document provided. 
+${modeInstruction}You MUST only answer the user's question using the text found in the document provided within the triple backticks. Do not use any external knowledge.
 If the answer is not available in the provided text, you MUST respond with the exact phrase: "I cannot find that information in the document."
+
+CRITICAL INSTRUCTION: If the document contains "--- Page X ---" markers, you MUST ALWAYS cite the exact page number(s) you found the information from at the very end of your answer in this exact format:
+Source: Page X
 
 DOCUMENT:
 \`\`\`

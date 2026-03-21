@@ -56,12 +56,15 @@
     <!-- 1. Initial Upload Screen -->
     <main id="initialScreen" class="flex-grow flex items-center justify-center p-4">
         <div class="max-w-xl w-full text-center px-6"> 
-            <h1 class="text-3xl font-extrabold mb-4 leading-tight tracking-tight">
-                Unlock insights <br><span class="text-indigo-600 dark:text-indigo-400">from your documents</span>
+            <h1 class="text-4xl font-extrabold mb-6 leading-tight tracking-tight drop-shadow-sm">
+                Chat with your <br><span class="text-indigo-600 dark:text-indigo-400">documents instantly</span>
             </h1>
-            <p class="text-lg text-slate-500 dark:text-slate-400 mb-10">
-                Instantly extract text and chat with your Documents and Code Markups. Simple, secure, and private.
-            </p>
+            
+            <div class="flex justify-center flex-wrap gap-4 mb-10 text-sm font-bold text-slate-600 dark:text-slate-400">
+                <div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center">1</div> Upload file</div>
+                <div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center">2</div> Wait for processing</div>
+                <div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">3</div> Ask questions</div>
+            </div>
 
             <div id="dropZone" class="glass-panel p-12 cursor-pointer relative border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl transition-all duration-300 hover:border-indigo-500 hover:bg-slate-50 dark:hover:bg-slate-800/50" onclick="document.getElementById('fileInputHidden').click()">
                 <div id="uploadStatus" class="flex flex-col items-center">
@@ -76,6 +79,18 @@
             </div>
 
             <input type="file" id="fileInputHidden" accept=".pdf,.doc,.docx,.txt,.rtf,.odt,.pages,.wps,.ppt,.pptx,.key,.odp,.ppsx,.md,.markdown,.html,.htm,.xml,.latex,.tex" class="hidden">
+            
+            <div class="mt-8 flex flex-col items-center gap-2 text-sm text-slate-500 dark:text-slate-400 font-medium pb-10">
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Processed securely in seconds
+                </div>
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-transparent stroke-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                    Files are not stored permanently
+                </div>
+            </div>
+            
         </div>
     </main>
 
@@ -122,10 +137,17 @@
                         <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" /></svg>
                         Ask Anything
                     </h2>
-                    <button onclick="window.saveChat()" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider hover:text-indigo-800 dark:hover:text-indigo-300 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-                        Save Chat
-                    </button>
+                    <div class="flex items-center gap-3">
+                        <select id="modeToggle" class="text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border-none outline-none px-2 py-1.5 rounded-lg cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors hidden sm:block shadow-sm">
+                            <option value="standard">Standard Mode</option>
+                            <option value="student">Student / ELI5</option>
+                            <option value="detailed">Detailed Analysis</option>
+                        </select>
+                        <button onclick="window.saveChat()" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider hover:text-indigo-800 dark:hover:text-indigo-300 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                            Save
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Chat Scroll Area -->
@@ -133,6 +155,13 @@
                     <div class="custom-ai-bubble bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm p-4 rounded-2xl rounded-tl-sm text-slate-800 dark:text-slate-100 self-start max-w-[85%] text-sm leading-relaxed">
                         I've analyzed your document. What specific part would you like to discuss or summarize?
                     </div>
+                </div>
+
+                <!-- Suggested Questions Header -->
+                <div class="px-5 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900 flex gap-2 overflow-x-auto whitespace-nowrap hide-scrollbar flex-shrink-0">
+                    <button onclick="window.askSuggested('Summarize this document')" class="text-[11px] font-bold px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-sm">Summarize this document</button>
+                    <button onclick="window.askSuggested('What are the key points?')" class="text-[11px] font-bold px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-sm">Key points</button>
+                    <button onclick="window.askSuggested('List any important dates or deadlines')" class="text-[11px] font-bold px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-sm">Important dates</button>
                 </div>
 
                 <!-- Input Form -->
