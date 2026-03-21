@@ -12,6 +12,16 @@
     background: #334155;
 }
 
+/* Hide scrollbar for horizontal scrolling elements (like Suggested Questions) */
+.hide-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none;    /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;            /* Chrome, Safari, Opera */
+}
+
 /* AI and User Chat Bubbles */
 .user-query {
     background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
