@@ -1,17 +1,21 @@
 // --- GLOBAL UTILITIES ---
 
 window.displayStatus = function(message, type = 'warning') {
-    const statusMessage = document.getElementById('statusMessage');
-    if (!statusMessage) return;
+    const badge = document.getElementById('headerStatusMessage');
+    if (!badge) return;
     
-    statusMessage.textContent = message;
-    statusMessage.className = 'status-badge';
+    badge.textContent = message;
+    badge.className = 'text-xs font-bold px-2 py-0.5 rounded flex-shrink-0 inline-block whitespace-nowrap lg:ml-2';
 
-    if (type === 'error') statusMessage.classList.add('status-error');
-    else if (type === 'success') statusMessage.classList.add('status-success');
-    else statusMessage.classList.add('status-warning');
+    if (type === 'error') {
+        badge.classList.add('text-rose-600', 'bg-rose-50', 'dark:text-rose-400', 'dark:bg-rose-900/40');
+    } else if (type === 'success') {
+        badge.classList.add('text-emerald-600', 'bg-emerald-50', 'dark:text-emerald-400', 'dark:bg-emerald-900/40');
+    } else {
+        badge.classList.add('text-amber-600', 'bg-amber-50', 'dark:text-amber-400', 'dark:bg-amber-900/40');
+    }
     
-    statusMessage.classList.remove('hidden');
+    badge.classList.remove('hidden');
 };
 
 window.switchScreen = function(targetId) {
@@ -272,7 +276,7 @@ async function processFile(file) {
         extractedTextDisplay.textContent = content;
 
         window.switchScreen('qaScreen');
-        window.displayStatus(`Successfully extracted text from ${fileType}. Ready for Q&A!`, 'success');
+        window.displayStatus(`Ready`, 'success');
         window.toggleChatInputs(true);
 
     } catch (error) {
