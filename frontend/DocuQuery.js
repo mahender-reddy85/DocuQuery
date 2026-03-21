@@ -1,9 +1,9 @@
 // --- GLOBAL UTILITIES ---
 
-window.displayStatus = function(message, type = 'warning') {
+window.displayStatus = function (message, type = 'warning') {
     const badge = document.getElementById('headerStatusMessage');
     if (!badge) return;
-    
+
     badge.textContent = message;
     badge.className = 'text-xs font-bold px-2 py-0.5 rounded flex-shrink-0 inline-block whitespace-nowrap lg:ml-2';
 
@@ -14,23 +14,23 @@ window.displayStatus = function(message, type = 'warning') {
     } else {
         badge.classList.add('text-amber-600', 'bg-amber-50', 'dark:text-amber-400', 'dark:bg-amber-900/40');
     }
-    
+
     badge.classList.remove('hidden');
 };
 
-window.switchScreen = function(targetId) {
+window.switchScreen = function (targetId) {
     const initialScreen = document.getElementById('initialScreen');
     const qaScreen = document.getElementById('qaScreen');
-    
+
     if (targetId === 'initialScreen') {
         qaScreen.classList.add('hidden');
         initialScreen.classList.remove('hidden');
-        
+
         // Reset state
         if (window.toggleChatInputs) window.toggleChatInputs(false);
         const extractedTextDisplay = document.getElementById('extractedTextDisplay');
         if (extractedTextDisplay) extractedTextDisplay.innerHTML = '<p class="text-gray-400 italic">Extracted text will appear here.</p>';
-        
+
         const dropZoneStatus = document.getElementById('dropZoneStatus');
         if (dropZoneStatus) {
             dropZoneStatus.classList.add('hidden');
@@ -42,13 +42,13 @@ window.switchScreen = function(targetId) {
     }
 };
 
-window.saveChat = function() {
+window.saveChat = function () {
     const chatHistory = document.getElementById('chatHistory');
     if (!chatHistory) return;
-    
+
     let chatText = 'DocuQuery AI Chat Log\n';
     chatText += '-------------------------------\n\n';
-    
+
     const bubbles = chatHistory.querySelectorAll('div > .ai-response, div > .user-query, .custom-ai-bubble, .ai-response, .user-query');
     bubbles.forEach(bubble => {
         if (bubble.id === 'aiPlaceholder') return; // Skip thinking indicator
@@ -56,7 +56,7 @@ window.saveChat = function() {
         const role = isUser ? 'You' : 'DocuQuery AI';
         chatText += `${role}:\n${bubble.innerText.trim()}\n\n`;
     });
-    
+
     const blob = new Blob([chatText], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -80,13 +80,11 @@ const API_URL = (window.location.hostname === 'localhost' || window.location.hos
 let extractedText = null;
 let getDocument;
 let mammoth;
-let Tesseract;
-let JSZip;
 
 // Element references
 let fileInputHidden, dropZone, dropZoneStatus, initialScreen, qaScreen, documentFileName;
 let questionForm, questionInput, submitQuestionButton, chatHistory, extractedTextDisplay;
-let loadingIndicator, statusMessage, chatLoading, sendIcon;
+let loadingIndicator, chatLoading, sendIcon;
 let themeToggle, sunIcon, moonIcon;
 
 // --- UTILITY FUNCTIONS ---
@@ -116,7 +114,7 @@ function displayDropZoneStatus(message, type) {
     if (!dropZoneStatus) return;
     dropZoneStatus.textContent = message;
     dropZoneStatus.className = 'status-badge mt-4';
-    
+
     if (type === 'processing') dropZoneStatus.classList.add('status-warning');
     else if (type === 'error') dropZoneStatus.classList.add('status-error');
     else {
@@ -126,14 +124,14 @@ function displayDropZoneStatus(message, type) {
     dropZoneStatus.classList.remove('hidden');
 }
 
-window.askSuggested = function(query) {
+window.askSuggested = function (query) {
     if (questionInput && !questionInput.disabled) {
         questionInput.value = query;
         if (questionForm) questionForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
     }
 };
 
-window.copyToClipboard = function(btn) {
+window.copyToClipboard = function (btn) {
     const textNode = btn.parentElement.parentElement.querySelector('.message-text');
     if (textNode) {
         navigator.clipboard.writeText(textNode.innerText);
@@ -150,11 +148,11 @@ function scrollChatToBottom() {
 function addChatMessage(text, role) {
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('flex', 'flex-col', 'max-w-[85%]', role === 'user' ? 'self-end' : 'self-start');
-    
+
     const bubble = document.createElement('div');
     bubble.classList.add('whitespace-pre-wrap');
     bubble.classList.add(role === 'user' ? 'user-query' : 'ai-response');
-    
+
     if (role === 'ai') {
         bubble.innerHTML = `<div class="message-text">${text.replace(/\n/g, '<br>')}</div>
         <div class="flex border-t border-slate-200 dark:border-slate-700/50 pt-2 mt-3 justify-end items-center">
@@ -163,7 +161,7 @@ function addChatMessage(text, role) {
     } else {
         bubble.innerHTML = `<div class="message-text">${text.replace(/\n/g, '<br>')}</div>`;
     }
-    
+
     messageDiv.appendChild(bubble);
     chatHistory.appendChild(messageDiv);
     scrollChatToBottom();
@@ -174,16 +172,16 @@ function toggleChatLoading(isLoading) {
     submitQuestionButton.disabled = isLoading;
     chatLoading.classList.toggle('hidden', !isLoading);
     sendIcon.classList.toggle('hidden', isLoading);
-    
+
     if (isLoading) {
         const placeholder = document.createElement('div');
         placeholder.id = 'aiPlaceholder';
         placeholder.classList.add('flex', 'flex-col', 'max-w-[85%]', 'self-start');
-        
+
         const bubble = document.createElement('div');
         bubble.classList.add('ai-response');
         bubble.innerHTML = 'Thinking...';
-        
+
         placeholder.appendChild(bubble);
         chatHistory.appendChild(placeholder);
         scrollChatToBottom();
@@ -193,7 +191,7 @@ function toggleChatLoading(isLoading) {
     }
 }
 
-window.toggleChatInputs = function(enable) {
+window.toggleChatInputs = function (enable) {
     if (questionInput) questionInput.disabled = !enable;
     if (submitQuestionButton) submitQuestionButton.disabled = !enable;
 };
@@ -216,29 +214,29 @@ async function extractPdfText(file) {
     const buffer = await file.arrayBuffer();
     const pdf = await getDocument({ data: buffer }).promise;
     let fullText = '';
-    
+
     for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        
+
         let lastY = null;
         let text = '';
-        
+
         for (let item of textContent.items) {
             // If the absolute Y coordinate changes by more than 5 points, assume it's a new line.
             if (lastY !== null && Math.abs(item.transform[5] - lastY) > 4) {
-                 text += '\n';
+                text += '\n';
             } else if (lastY !== null && text.length > 0 && !text.endsWith(' ') && !text.endsWith('\n')) {
-                 // Add a space between words on the same line if they don't already touch
-                 text += ' ';
+                // Add a space between words on the same line if they don't already touch
+                text += ' ';
             }
             text += item.str;
             if (item.hasEOL) {
-                 text += '\n';
+                text += '\n';
             }
             lastY = item.transform[5];
         }
-        
+
         // Clean up formatting
         text = text.replace(/ +/g, ' ').replace(/\n /g, '\n');
         fullText += text + '\n\n';
@@ -250,12 +248,12 @@ async function extractPptxText(file) {
     if (!window.JSZip) throw new Error("JSZip not loaded.");
     const zip = await window.JSZip.loadAsync(file);
     let fullText = '';
-    
+
     // Find all slides
     const slideFiles = Object.keys(zip.files).filter(name => name.startsWith('ppt/slides/slide') && name.endsWith('.xml'));
-    
+
     // Process slides in order
-    slideFiles.sort((a,b) => {
+    slideFiles.sort((a, b) => {
         const numA = parseInt(a.match(/slide(\d+)\.xml/)[1]);
         const numB = parseInt(b.match(/slide(\d+)\.xml/)[1]);
         return numA - numB;
@@ -284,12 +282,12 @@ async function extractOdfText(file) {
     if (!window.JSZip) throw new Error("JSZip not loaded.");
     const zip = await window.JSZip.loadAsync(file);
     if (!zip.files["content.xml"]) throw new Error("Invalid ODF document.");
-    
+
     const xmlText = await zip.files["content.xml"].async("string");
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlText, "text/xml");
     const textNodes = xmlDoc.getElementsByTagName("text:p");
-    
+
     let fullText = '';
     for (let i = 0; i < textNodes.length; i++) {
         fullText += textNodes[i].textContent + "\n\n";
@@ -313,7 +311,7 @@ async function extractRawBinaryText(file) {
 async function processFile(file) {
     toggleFileLoading(true);
     displayDropZoneStatus(`Processing ${file.name}...`, 'processing');
-    
+
     const ext = file.name.split('.').pop().toLowerCase();
     let content = '';
     let fileType = 'Unknown';
@@ -349,7 +347,7 @@ async function processFile(file) {
         }
 
         if (!content || content.length < 5) {
-             throw new Error("No readable text found in document.");
+            throw new Error("No readable text found in document.");
         }
 
         extractedText = content;
@@ -374,7 +372,7 @@ async function processFile(file) {
 async function callGeminiApi(userQuery) {
     const modeToggle = document.getElementById('modeToggle');
     const mode = modeToggle ? modeToggle.value : 'standard';
-    
+
     let modeInstruction = "";
     if (mode === 'student') {
         modeInstruction = "Explain the answer simply and clearly, as if explaining to a 5-year-old or a beginner student. Use simple analogies if helpful. ";
@@ -400,20 +398,20 @@ ${extractedText}
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ userQuery, systemPrompt, extractedText, model: MODEL })
         });
-        
+
         let result;
         const rawText = await response.text();
-        
+
         try {
             result = JSON.parse(rawText);
-        } catch(e) {
+        } catch (e) {
             result = { error: rawText };
         }
-        
+
         if (!response.ok) {
             return `API Error (${response.status}): ${result.error?.message || result.error || JSON.stringify(result)}`;
         }
-        
+
         return result.text || "No response received.";
     } catch (err) {
         return `Connection Error: ${err.message}. Please physically ensure your backend server (node server.js) is currently running on port 3000.`;
@@ -448,7 +446,6 @@ function setupEventListeners() {
     chatHistory = document.getElementById('chatHistory');
     extractedTextDisplay = document.getElementById('extractedTextDisplay');
     loadingIndicator = document.getElementById('loadingIndicator');
-    statusMessage = document.getElementById('statusMessage');
     chatLoading = document.getElementById('chatLoading');
     sendIcon = document.getElementById('sendIcon');
     themeToggle = document.getElementById('themeToggle');
@@ -475,7 +472,7 @@ function setupEventListeners() {
     fileInputHidden.addEventListener('change', () => {
         if (fileInputHidden.files[0]) processFile(fileInputHidden.files[0]);
     });
-    
+
     // Global Drag & Drop Overlay Logic
     let dragCounter = 0;
     const overlay = document.getElementById('globalDragOverlay');

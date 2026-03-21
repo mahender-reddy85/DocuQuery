@@ -1,101 +1,61 @@
-# DocuQuery: Q&A
+# DocuQuery
 
-An intelligent document processing and question-answering application that lets you upload documents (PDF, DOCX, TXT) and ask questions about their content using AI-powered responses grounded in the document text.
+An advanced, intelligent document processing and question-answering application that lets you instantly drag and drop over 20+ document formats and chat with their content using AI. The system is entirely powered by **Llama 3 8B Instruct** via OpenRouter and built with a sleek, responsive Tailwind UI.
 
-## Features
+## ✨ Key Features
 
-### 📄 Document Support
-- **PDF Files** - Extract text from PDF documents
-- **DOCX Files** - Extract text from Microsoft Word documents  
-- **TXT Files** - Plain text file support
-- **Drag & Drop** - Easy file upload with drag-and-drop interface
-- **Click to Browse** - Traditional file picker support
+### 📄 Universal Document Support
+DocuQuery uses a suite of custom 8-bit text rippers, regex algorithms, and native XML tree-walkers to strictly extract raw information natively from browsers:
+- **Word Processors:** `.docx`, `.doc`, `.rtf`, `.odt`, `.pages`, `.wps`
+- **Presentations:** `.pptx`, `.ppt`, `.ppsx`, `.key`, `.odp`
+- **Web & Markup:** `.md`, `.html`, `.xml`, `.tex`
+- **Universals:** `.pdf`, `.txt`
+- **Global Drag & Drop:** A frosted-glass drop zone detects files dragged directly into your browser from anywhere on your OS.
 
-### 🤖 AI-Powered Q&A
-- **Gemini 2.0 Flash** - State-of-the-art AI model for intelligent responses
-- **Grounded Responses** - AI strictly limited to answering based on document content
-- **Real-time Chat** - Interactive conversation interface
-- **No External Knowledge** - Ensures answers are document-specific
+### 🧠 Advanced AI Integration
+- **Llama 3 Powered:** Re-wired explicitly to use Meta's highly-capable Llama-3-8B-Instruct model via OpenRouter API.
+- **Source Citations:** AI automatically tracks PDF struct markers and actively cites `Source: Page X` so you can verify its facts natively.
+- **Student / ELI5 Mode:** Dynamically switch the AI's persona from technical auditor to beginner-friendly instructor using the header toggle.
+- **Suggested Questions:** Instantly trigger contextual prompts with one click to break blank-page syndrome.
 
-### 🎨 User Interface
-- **Dark Mode Support** - Full dark and light theme support with system preference detection
-- **Responsive Design** - Works seamlessly on desktop, tablet, and mobile devices
-- **Mobile Optimized** - Stacked layout on mobile, side-by-side on desktop
-- **Clean & Modern** - Custom CSS styling with intuitive UI components
+### 🎨 Premium UI/UX
+- **Modern Tailwind Design:** Custom dark/light mode toggle adapting systematically to your OS preference.
+- **Responsive Geometry:** CSS Grid architecture collapses elegantly from a dual-pane workstation into a vertically stacked mobile app automatically.
+- **Copy Buttons:** Native clipboard exporting directly embedded into AI chat bubbles.
+- **Chat Archiving:** Click `Save Chat` to securely dump and download your existing conversation history into a formatted `.txt` file.
 
-### 🔒 Privacy & Security
-- **Client-Side Processing** - Most text extraction happens in your browser
-- **Secure** - No data is stored on external servers during processing
-- **Privacy First** - Complete privacy-first approach
+## 🚀 Getting Started
 
-## Project Structure
+### 1. Server Setup (Local or Cloud)
+The app uses an Express proxy to securely hide your API Token.
 
-```
-DocuQuery/
-├── frontend/
-│   ├── index.html          # Main HTML entry point
-│   ├── DocuQuery.css       # Clean, deduplicated stylesheet
-│   ├── DocuQuery.js        # Core JavaScript logic & API integration
-│   └── DocuQuery.jpg       # Icon / Favicon
-├── backend/
-│   ├── server.js           # Secure node.js proxy for Gemini API
-│   ├── package.json        # Backend configuration (Express, Dotenv)
-│   └── .env.example        # Template for environment variables
-└── README.md               # This file
-```
-
-## How to Get Started
-
-### 1. Backend Setup
-1. Navigate to the `backend` directory.
-2. Install dependencies:
+1. Navigate to the `backend` directory:
    ```bash
+   cd backend
    npm install
    ```
-3. Create a `.env` file from the example:
-   ```bash
-   cp .env.example .env
+2. Get an API key from [OpenRouter](https://openrouter.ai/).
+3. Add the key locally by creating a file named `.env.local` in the backend folder:
+   ```env
+   OPENROUTER_API_KEY=your_key_here
    ```
-4. Add your **Google Gemini API Key** to the `.env` file.
-5. Start the server:
+   *(If deploying to Render, simply add the key to your Render Environment Dashboard).*
+4. Start the server:
    ```bash
    npm start
    ```
 
-### 2. Frontend Access
-1. Open `frontend/index.html` in your browser.
-2. The frontend will automatically detect if you are running locally (`localhost`) and call your local proxy at `http://localhost:3000/api/generate`.
-3. If deployed, it can be configured to call your production backend.
+### 2. Frontend Execution
+Simply open `frontend/index.html` natively in your browser!
+The application's dynamic router will automatically detect `file:///` and intelligently bounce API calls straight to your local node proxy, or natively target your cloud domain if you host it elsewhere.
 
-## How to Use
-
-### 1. Upload a Document
-- Click on the drop zone or drag & drop a file
-- Supported formats: PDF, DOCX, TXT
-- File is processed securely in your browser
-
-### 2. View Extracted Text
-- After upload, extracted text appears in the left panel
-- Full text preview with scrollable area
-
-### 3. Ask Questions
-- Type questions in the input field
-- AI responds based only on the document content
-
-### 4. Toggle Theme
-- Click the theme toggle button (sun/moon icon) in the top right
-- Switches between light and dark modes
-
-## Technologies Used
-- **Frontend**: HTML5, CSS3 (Custom Utilities), Vanilla JavaScript (ESM)
-- **Extraction**: Mammoth.js (DOCX), PDF.js (PDF)
-- **AI Engine**: Google Gemini 2.0 Flash
-- **Backend**: Node.js, Express, Dotenv
-
-## License
-ISC
+## 🛠️ Technology Stack
+- **Frontend Architecture:** HTML5, CSS3, Vanilla JS (ESModules), Tailwind CSS Utilities
+- **Native Document Parsers:** PDF.js, Mammoth.js, JSZip
+- **Backend Infrastructure:** Node.js, Express, strict JSON chunking limitations
+- **AI Brain:** OpenRouter API 
 
 ---
-**Version**: 1.1.0 (Cleaned & Optimized)  
+**Version**: 2.0.0 (The Llama Update)  
 **Last Updated**: March 21, 2026  
 **Repository**: mahender-reddy85/DocuQuery

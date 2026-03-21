@@ -1,17 +1,15 @@
 /* Custom Scrollbars */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-.dark ::-webkit-scrollbar-thumb { background: #334155; }
-
-/* Drag and Drop hover state override */
-.drag-over {
-    transform: scale(1.02);
-    background-color: #eef2ff !important; /* indigo 50 */
-    border-color: #6366f1 !important; /* indigo 500 */
+::-webkit-scrollbar {
+    width: 6px;
 }
 
-.dark .drag-over {
-    background-color: rgba(30, 27, 75, 0.4) !important; /* indigo 900 / 40% */
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #334155;
 }
 
 /* AI and User Chat Bubbles */
@@ -35,7 +33,7 @@
     border-radius: 1rem 1rem 1rem 0.25rem;
     max-width: 85%;
     align-self: flex-start;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     font-size: 0.875rem;
     line-height: 1.6;
 }
