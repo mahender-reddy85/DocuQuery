@@ -1,85 +1,45 @@
-// Define displayStatus globally first, as it's needed by both the module and switchScreen
+// --- GLOBAL UTILITIES ---
+
 window.displayStatus = function(message, type = 'warning') {
     const statusMessage = document.getElementById('statusMessage');
     if (!statusMessage) return;
     
     statusMessage.textContent = message;
-    // Base classes for the status box
-    statusMessage.className = 'mt-2 p-3 text-sm rounded-lg border';
+    statusMessage.className = 'status-badge';
 
-    if (type === 'error') {
-        // Light mode classes
-        statusMessage.classList.add('text-red-700', 'bg-red-50', 'border-red-200');
-        // Dark mode classes
-        statusMessage.classList.add('dark:text-red-300', 'dark:bg-red-900/50', 'dark:border-red-800');
-    } else if (type === 'success') {
-        // Light mode classes
-        statusMessage.classList.add('text-green-700', 'bg-green-50', 'border-green-200');
-        // Dark mode classes
-        statusMessage.classList.add('dark:text-green-300', 'dark:bg-green-900/50', 'dark:border-green-800');
-    } else { // Warning (e.g., Awaiting file upload)
-        // Light mode classes
-        statusMessage.classList.add('text-yellow-700', 'bg-yellow-50', 'border-yellow-200');
-        // Dark mode classes
-        statusMessage.classList.add('dark:text-yellow-300', 'dark:bg-yellow-900/50', 'dark:border-yellow-800');
-    }
+    if (type === 'error') statusMessage.classList.add('status-error');
+    else if (type === 'success') statusMessage.classList.add('status-success');
+    else statusMessage.classList.add('status-warning');
+    
     statusMessage.classList.remove('hidden');
 };
 
-// Global utility function, accessible from HTML onclick attributes
 window.switchScreen = function(targetId) {
-    // Get necessary elements inside the global function
     const initialScreen = document.getElementById('initialScreen');
     const qaScreen = document.getElementById('qaScreen');
-    const documentFileName = document.getElementById('documentFileName');
-    const extractedTextDisplay = document.getElementById('extractedTextDisplay');
-    const brandingContainer = document.getElementById('brandingContainer');
     const mainHeader = document.getElementById('mainHeader');
-    const dropZoneStatus = document.getElementById('dropZoneStatus');
-
+    
     if (targetId === 'initialScreen') {
         qaScreen.classList.add('hidden');
         initialScreen.classList.remove('hidden');
-
-        // Restore header positioning for centered screen
-        mainHeader.classList.add('absolute', 'top-0', 'left-0', 'right-0');
-        mainHeader.classList.remove('relative', 'mb-6');
-
-        brandingContainer.classList.remove('hidden'); // Show branding
-
-        // Clear the drop zone status message when returning to initial screen
-        if (dropZoneStatus) {
-            dropZoneStatus.textContent = '';
-            dropZoneStatus.classList.add('hidden');
-        }
-
-        // Clear state when returning to upload screen
-        documentFileName.textContent = '';
-        extractedTextDisplay.innerHTML = '<p class="text-gray-400 italic">Extracted text will appear here.</p>';
+        mainHeader.classList.add('absolute');
+        mainHeader.classList.remove('relative');
         
-        // Use the global function to update inputs (will be defined later in module)
+        // Reset state
         if (window.toggleChatInputs) window.toggleChatInputs(false);
-        window.displayStatus('Awaiting file upload (PDF, DOCX, TXT).', 'warning');
+        const extractedTextDisplay = document.getElementById('extractedTextDisplay');
+        if (extractedTextDisplay) extractedTextDisplay.innerHTML = '<p class="text-gray-400 italic">Extracted text will appear here.</p>';
     } else {
         initialScreen.classList.add('hidden');
         qaScreen.classList.remove('hidden');
-
-        // Adjust header positioning for QA screen
-        mainHeader.classList.remove('absolute', 'top-0', 'left-0', 'right-0');
-        mainHeader.classList.add('relative', 'mb-6');
-
-        brandingContainer.classList.add('hidden'); // Hide branding
+        mainHeader.classList.remove('absolute');
+        mainHeader.classList.add('relative');
     }
 };
 
 // --- CONFIGURATION ---
 
-// Gemini model choice
 const MODEL = 'gemini-2.0-flash';
-
-// API Configuration
-// For local development, use: http://localhost:3000/api/generate
-// For production, use your deployed server URL
 const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:3000/api/generate'
     : 'https://docuquery-b68i.onrender.com/api/generate';
@@ -89,6 +49,8 @@ const API_URL = window.location.hostname === 'localhost' || window.location.host
 let extractedText = null;
 let getDocument;
 let mammoth;
+let Tesseract;
+let JSZip;
 
 // Element references
 let fileInputHidden, dropZone, dropZoneStatus, initialScreen, qaScreen, documentFileName;
@@ -120,26 +82,15 @@ function toggleTheme() {
 function displayDropZoneStatus(message, type) {
     if (!dropZoneStatus) return;
     dropZoneStatus.textContent = message;
-    dropZoneStatus.classList.remove('hidden', 'text-blue-500', 'text-red-500', 'dark:text-blue-300', 'dark:text-red-300');
-
-    if (type === 'processing') {
-        dropZoneStatus.classList.add('text-blue-500', 'dark:text-blue-300');
-    } else if (type === 'error') {
-        dropZoneStatus.classList.add('text-red-500', 'dark:text-red-300');
-    } else {
+    dropZoneStatus.className = 'status-badge mt-4';
+    
+    if (type === 'processing') dropZoneStatus.classList.add('status-warning');
+    else if (type === 'error') dropZoneStatus.classList.add('status-error');
+    else {
         dropZoneStatus.classList.add('hidden');
         return;
     }
     dropZoneStatus.classList.remove('hidden');
-}
-
-function readFileAsArrayBuffer(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (event) => resolve(event.target.result);
-        reader.onerror = (error) => reject(error);
-        reader.readAsArrayBuffer(file);
-    });
 }
 
 function scrollChatToBottom() {
@@ -149,14 +100,8 @@ function scrollChatToBottom() {
 function addChatMessage(text, role) {
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('max-w-[85%]', 'whitespace-pre-wrap');
-
-    if (role === 'user') {
-        messageDiv.classList.add('user-query', 'self-end');
-    } else {
-        messageDiv.classList.add('ai-response', 'self-start');
-    }
+    messageDiv.classList.add(role === 'user' ? 'user-query' : 'ai-response');
     messageDiv.innerHTML = text.replace(/\n/g, '<br>');
-
     chatHistory.appendChild(messageDiv);
     scrollChatToBottom();
 }
@@ -169,7 +114,7 @@ function toggleChatLoading(isLoading) {
     if (isLoading) {
         const placeholder = document.createElement('div');
         placeholder.id = 'aiPlaceholder';
-        placeholder.classList.add('ai-response', 'self-start');
+        placeholder.classList.add('ai-response');
         placeholder.innerHTML = 'Thinking...';
         chatHistory.appendChild(placeholder);
         scrollChatToBottom();
@@ -179,7 +124,6 @@ function toggleChatLoading(isLoading) {
     }
 }
 
-// Make toggleChatInputs global so switchScreen can access it
 window.toggleChatInputs = function(enable) {
     if (questionInput) questionInput.disabled = !enable;
     if (submitQuestionButton) submitQuestionButton.disabled = !enable;
@@ -192,96 +136,112 @@ function toggleFileLoading(isLoading) {
 // --- EXTRACTION ---
 
 async function extractDocxText(file) {
-    if (!mammoth) throw new Error("mammoth.js not loaded.");
-    const arrayBuffer = await readFileAsArrayBuffer(file);
-    const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+    if (!mammoth) throw new Error("Mammoth.js not loaded.");
+    const buffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer: buffer });
     return result.value;
 }
 
 async function extractPdfText(file) {
-    if (!getDocument) throw new Error("PDF.js getDocument not initialized.");
-    const arrayBuffer = await readFileAsArrayBuffer(file);
-    const pdf = await getDocument({ data: arrayBuffer }).promise;
+    if (!getDocument) throw new Error("PDF.js not initialized.");
+    const buffer = await file.arrayBuffer();
+    const pdf = await getDocument({ data: buffer }).promise;
     let fullText = '';
     for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        const pageText = textContent.items.map(item => item.str).join(' ');
-        fullText += pageText + '\n\n';
+        fullText += textContent.items.map(item => item.str).join(' ') + '\n\n';
     }
     return fullText.trim();
 }
 
-async function processFile(file) {
-    // PPTX check
-    if (file.name.endsWith('.pptx') || file.type.includes('officedocument.presentationml')) {
-         displayDropZoneStatus(`PPTX files are currently not supported for extraction. Please use PDF, DOCX, or TXT.`, 'error');
-         return;
+async function extractPptxText(file) {
+    if (!window.JSZip) throw new Error("JSZip not loaded.");
+    const zip = await window.JSZip.loadAsync(file);
+    let fullText = '';
+    
+    // Find all slides
+    const slideFiles = Object.keys(zip.files).filter(name => name.startsWith('ppt/slides/slide') && name.endsWith('.xml'));
+    
+    // Process slides in order
+    slideFiles.sort((a,b) => {
+        const numA = parseInt(a.match(/slide(\d+)\.xml/)[1]);
+        const numB = parseInt(b.match(/slide(\d+)\.xml/)[1]);
+        return numA - numB;
+    });
+
+    for (const slideFile of slideFiles) {
+        const xmlText = await zip.files[slideFile].async("string");
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+        const textNodes = xmlDoc.getElementsByTagName("a:t");
+        for (let i = 0; i < textNodes.length; i++) {
+            fullText += textNodes[i].textContent + " ";
+        }
+        fullText += "\n\n";
     }
+    return fullText.trim();
+}
 
+async function extractImageText(file) {
+    if (!window.Tesseract) throw new Error("Tesseract.js not loaded.");
+    const result = await window.Tesseract.recognize(file, 'eng');
+    return result.data.text;
+}
+
+async function processFile(file) {
     toggleFileLoading(true);
-    displayDropZoneStatus(`Processing file: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)...`, 'processing');
-    extractedTextDisplay.textContent = 'Processing...';
-
-    const mimeType = file.type;
-    let extractedContent = '';
+    displayDropZoneStatus(`Processing ${file.name}...`, 'processing');
+    
+    const ext = file.name.split('.').pop().toLowerCase();
+    let content = '';
     let fileType = 'Unknown';
 
     try {
-        if (mimeType === 'application/pdf') {
+        if (ext === 'pdf') {
             fileType = 'PDF';
-            extractedContent = await extractPdfText(file);
-        } else if (mimeType.includes('officedocument.wordprocessingml') || file.name.endsWith('.docx')) {
+            content = await extractPdfText(file);
+        } else if (ext === 'docx') {
             fileType = 'DOCX';
-            extractedContent = await extractDocxText(file);
-        } else if (mimeType.startsWith('text/') || file.name.endsWith('.txt')) {
+            content = await extractDocxText(file);
+        } else if (ext === 'pptx') {
+            fileType = 'PPTX';
+            content = await extractPptxText(file);
+        } else if (ext === 'txt') {
             fileType = 'TXT';
-            extractedContent = await file.text();
+            content = await file.text();
+        } else if (['png', 'jpg', 'jpeg'].includes(ext)) {
+            fileType = 'Image (OCR)';
+            content = await extractImageText(file);
         } else {
-            throw new Error(`Unsupported file type: ${mimeType}. Please use PDF, DOCX, or TXT.`);
+            throw new Error(`Unsupported file type: ${ext}`);
         }
 
-        if (!extractedContent || extractedContent.trim().length === 0) {
-            extractedText = null;
-            extractedTextDisplay.textContent = 'No text could be extracted from this file.';
-            displayDropZoneStatus(`Extraction failed: No readable text found in ${fileType}.`, 'error');
-            window.toggleChatInputs(false);
-        } else {
-            extractedText = extractedContent;
-            documentFileName.textContent = file.name;
-            extractedTextDisplay.textContent = extractedContent;
-
-            window.switchScreen('qaScreen');
-            window.displayStatus(`Successfully extracted text from ${fileType}. Ready for Q&A!`, 'success');
-            window.toggleChatInputs(true);
+        if (!content || content.length < 5) {
+             throw new Error("No readable text found in document.");
         }
+
+        extractedText = content;
+        documentFileName.textContent = file.name;
+        extractedTextDisplay.textContent = content;
+
+        window.switchScreen('qaScreen');
+        window.displayStatus(`Successfully extracted text from ${fileType}. Ready for Q&A!`, 'success');
+        window.toggleChatInputs(true);
 
     } catch (error) {
         console.error('Extraction Error:', error);
-        extractedText = null;
-        extractedTextDisplay.textContent = `Error during extraction: ${error.message}`;
-        displayDropZoneStatus(`An error occurred during extraction: ${error.message}`, 'error');
+        displayDropZoneStatus(`Error: ${error.message}`, 'error');
         window.toggleChatInputs(false);
     } finally {
         toggleFileLoading(false);
-        if (qaScreen.classList.contains('hidden')) {
-             setTimeout(() => {
-                 displayDropZoneStatus('', 'hidden');
-             }, 5000);
-        }
     }
-}
-
-function handleFileInputChange() {
-     const file = fileInputHidden.files[0];
-     if (file) processFile(file);
 }
 
 // --- API ---
 
 async function callGeminiApi(userQuery) {
     const systemPrompt = `You are an expert Q&A system. Your sole source of information is the document provided. You MUST only answer the user's question using the text found in the document provided within the triple backticks. Do not use any external knowledge.
-
 If the answer is not available in the provided text, you MUST respond with the exact phrase: "I cannot find that information in the document."
 
 DOCUMENT:
@@ -293,19 +253,12 @@ ${extractedText}
         const response = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                userQuery,
-                systemPrompt,
-                extractedText,
-                model: MODEL
-            })
+            body: JSON.stringify({ userQuery, systemPrompt, extractedText, model: MODEL })
         });
-
         const result = await response.json();
-        return result.text || "Sorry, I received an empty response from the AI.";
+        return result.text || "No response received.";
     } catch (err) {
-        console.error("Gemini API Error:", err);
-        return `An error occurred while communicating with the AI: ${err.message}`;
+        return `API Error: ${err.message}`;
     }
 }
 
@@ -313,56 +266,18 @@ ${extractedText}
 
 async function handleAskQuestion(e) {
     e.preventDefault();
-    const userQuery = questionInput.value.trim();
+    const query = questionInput.value.trim();
+    if (!query || !extractedText) return;
 
-    if (!userQuery) return;
-    if (!extractedText) {
-        window.displayStatus('Please extract text from a document first!', 'error');
-        return;
-    }
-
-    addChatMessage(userQuery, 'user');
+    addChatMessage(query, 'user');
     questionInput.value = '';
-
     toggleChatLoading(true);
-    const aiResponse = await callGeminiApi(userQuery);
+    const answer = await callGeminiApi(query);
     toggleChatLoading(false);
-
-    addChatMessage(aiResponse, 'ai');
+    addChatMessage(answer, 'ai');
 }
 
-function handleDragOver(e) {
-    e.preventDefault();
-    dropZone.classList.add('drag-over');
-}
-
-function handleDragLeave(e) {
-    e.preventDefault();
-    dropZone.classList.remove('drag-over');
-}
-
-function handleDrop(e) {
-    e.preventDefault();
-    dropZone.classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if (!file) return;
-
-    const acceptedTypes = ['.pdf', '.docx', '.txt', '.pptx'];
-    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-
-    if (!acceptedTypes.includes(fileExtension)) {
-         displayDropZoneStatus(`Unsupported file type: ${fileExtension}. Please use PDF, DOCX, or TXT.`, 'error');
-         return;
-    }
-
-    fileInputHidden.files = e.dataTransfer.files;
-    processFile(file);
-}
-
-// --- INITIALIZATION ---
-
-async function setupEventListeners() {
-    // References
+function setupEventListeners() {
     fileInputHidden = document.getElementById('fileInputHidden');
     dropZone = document.getElementById('dropZone');
     dropZoneStatus = document.getElementById('dropZoneStatus');
@@ -379,37 +294,39 @@ async function setupEventListeners() {
     chatLoading = document.getElementById('chatLoading');
     sendIcon = document.getElementById('sendIcon');
     themeToggle = document.getElementById('themeToggle');
-    sunIcon = document.getElementById('sunIcon');
-    moonIcon = document.getElementById('moonIcon');
+    [sunIcon, moonIcon] = [document.getElementById('sunIcon'), document.getElementById('moonIcon')];
 
-    // Theme
+    // Theme setup
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     applyTheme(savedTheme === 'dark' || (!savedTheme && prefersDark));
     themeToggle.addEventListener('click', toggleTheme);
 
-    // PDF.js
-    try {
-        const pdfModule = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs');
-        getDocument = pdfModule.getDocument;
-        if (pdfModule.GlobalWorkerOptions) {
-            pdfModule.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
-        }
-    } catch (error) {
-        console.error("Failed to load PDF.js:", error);
-    }
+    // Initial Screen
+    window.switchScreen('initialScreen');
 
-    // Mammoth
+    // PDF.js
+    import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs').then(m => {
+        getDocument = m.getDocument;
+        m.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
+    });
+
     mammoth = window.mammoth;
 
     // Listeners
-    fileInputHidden.addEventListener('change', handleFileInputChange);
-    dropZone.addEventListener('dragover', handleDragOver);
-    dropZone.addEventListener('dragleave', handleDragLeave);
-    dropZone.addEventListener('drop', handleDrop);
-    questionForm.addEventListener('submit', handleAskQuestion);
+    fileInputHidden.addEventListener('change', () => {
+        if (fileInputHidden.files[0]) processFile(fileInputHidden.files[0]);
+    });
+    
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); });
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
+    });
 
-    window.switchScreen('initialScreen');
+    questionForm.addEventListener('submit', handleAskQuestion);
 }
 
 window.onload = setupEventListeners;
