@@ -19,8 +19,8 @@ app.use((req, res, next) => {
 
 app.use(express.json({ limit: '2mb' }));
 
-if (!process.env.GEMINI_API_KEY) {
-  console.warn('Warning: GEMINI_API_KEY is not set. The proxy will fail without it.');
+if (!process.env.OPENROUTER_API_KEY) {
+  console.warn('Warning: OPENROUTER_API_KEY is not set. The proxy will fail without it.');
 }
 
 // ----- Optional Diagnostics -----
@@ -43,36 +43,28 @@ app.get('/api/generate', (req, res) => {
 // ----- MAIN API -----
 app.post('/api/generate', async (req, res) => {
   try {
-    const { userQuery, systemPrompt, extractedText, model, generationConfig } = req.body || {};
-    const MODEL = model || 'gemini-2.0-flash';
+    const { userQuery, systemPrompt, extractedText, model } = req.body || {};
+    const MODEL = model || 'meta-llama/llama-3-8b-instruct';
 
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: 'Server misconfiguration: GEMINI_API_KEY not set.' });
+    if (!process.env.OPENROUTER_API_KEY) {
+      return res.status(500).json({ error: 'Server misconfiguration: OPENROUTER_API_KEY not set.' });
     }
 
-    // Gemini API endpoint
-    const API_ENDPOINT = 
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`;
-
-    // ----- Proper Gemini request structure -----
     const payload = {
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: userQuery || "" }]
-        }
-      ],
-      systemInstruction: {
-        role: "system",
-        parts: [{ text: systemPrompt || `DOCUMENT:\n\n${extractedText}` }]
-      },
-      generationConfig: generationConfig || { temperature: 0.3 }
+      model: MODEL,
+      messages: [
+        { role: "system", content: systemPrompt || `DOCUMENT:\n\n${extractedText}` },
+        { role: "user", content: userQuery || "" }
+      ]
     };
 
-    // ----- Call Gemini -----
-    const response = await fetch(API_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    // ----- Call OpenRouter -----
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify(payload)
     });
 
@@ -84,30 +76,9 @@ app.post('/api/generate', async (req, res) => {
 
     const json = JSON.parse(raw);
 
-    // ----- Robust extraction (covers ALL formats) -----
-    let text = null;
-
-    // Standard response
-    if (json.candidates?.[0]?.content?.parts?.[0]?.text) {
-      text = json.candidates[0].content.parts[0].text;
-    }
-    // Variant: content is array of parts
-    else if (json.candidates?.[0]?.content?.[0]?.text) {
-      text = json.candidates[0].content[0].text;
-    }
-    // Variant: output field
-    else if (json.candidates?.[0]?.output) {
-      text = json.candidates[0].output;
-    }
-    // Variant: direct text field
-    else if (json.text) {
-      text = json.text;
-    }
-
-    // Final fallback: force a readable string
-    if (!text) text = "I'm sorry ? the model returned no readable text.";
-
-    return res.json({ text });
+    return res.json({
+      text: json.choices?.[0]?.message?.content || "No response received."
+    });
 
   } catch (err) {
     console.error('Proxy error:', err);

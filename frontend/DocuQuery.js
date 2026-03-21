@@ -70,7 +70,7 @@ window.saveChat = function() {
 
 // --- CONFIGURATION ---
 
-const MODEL = 'gemini-2.0-flash';
+const MODEL = 'meta-llama/llama-3-8b-instruct';
 const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:')
     ? 'http://localhost:3000/api/generate'
     : 'https://docuquery-b68i.onrender.com/api/generate';
