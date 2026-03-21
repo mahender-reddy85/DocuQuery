@@ -3,133 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DocuQuery : Intelligent Document Assistant</title>
+    <title>DocuQuery : Intelligent Q&A</title>
     <link rel="icon" type="image/jpeg" href="./DocuQuery.jpg">
     <link rel="stylesheet" href="./DocuQuery.css">
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="light">
     
-    <!-- Background Accents -->
+    <!-- Background Sparkles -->
     <div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10" id="bgAccents"></div>
 
-    <!-- Header -->
-    <header id="mainHeader" class="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-50">
-        <div id="brandingContainer" class="flex items-center gap-2">
-            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
+    <!-- Persistent Header -->
+    <header id="mainHeader" class="flex justify-between items-center px-10">
+        <div id="brandingContainer" class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m-5 4h8a2 2 0 002-2V7a2 2 0 00-2-2H9a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
             </div>
             <span class="text-2xl font-extrabold tracking-tight text-slate-800 dark:text-white">DocuQuery</span>
         </div>
 
-        <button id="themeToggle" aria-label="Toggle theme" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors">
-            <svg id="sunIcon" class="w-6 h-6 hidden text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-            <svg id="moonIcon" class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        <button id="themeToggle" aria-label="Toggle theme" class="w-12 h-12 rounded-full flex items-center justify-center hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-all">
+            <svg id="sunIcon" class="w-6 h-6 hidden text-amber-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 7a5 5 0 100 10 5 5 0 000-10zM2 13h2a1 1 0 100-2H2a1 1 0 100 2zm18 0h2a1 1 0 100-2h-2a1 1 0 100 2zM11 2v2a1 1 0 102 0V2a1 1 0 10-2 0zm0 18v2a1 1 0 102 0v-2a1 1 0 10-2 0zM5.99 4.58a1 1 0 111.41 1.41L6.34 7.05a1 1 0 11-1.41-1.41l1.06-1.06zm12.02 12.02a1 1 0 111.41 1.41l-1.06 1.06a1 1 0 11-1.41-1.41l1.06-1.06zm-12.02 1.41a1 1 0 11-1.41-1.41l1.06-1.06a1 1 0 111.41 1.41l-1.06 1.06zm13.43-13.43a1 1 0 11-1.41 1.41l-1.06-1.06a1 1 0 111.41-1.41l1.06 1.06z"/></svg>
+            <svg id="moonIcon" class="w-6 h-6 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
         </button>
     </header>
 
     <!-- 1. Initial Upload Screen -->
-    <div id="initialScreen" class="full-screen-center">
+    <main id="initialScreen" class="full-screen-center">
         <div class="max-w-xl w-full text-center px-6"> 
             <h1 class="text-3xl mb-4 leading-tight">
-                Instantly chat with <br><span class="text-indigo-600">any document</span>
+                Unlock insights <br><span class="text-indigo-600">from your documents</span>
             </h1>
             <p class="text-lg text-gray-500 mb-10">
-                Upload a PDF, DOCX, TXT, PPTX or Image. We'll extract the content securely and let you ask questions grounded in the text.
+                Instantly extract text and chat with your PDF, Word, PowerPoint, or Text files. Simple, secure, and private.
             </p>
 
-            <!-- Drop Zone Area -->
-            <div id="dropZone" class="glass-panel p-10 cursor-pointer" onclick="document.getElementById('fileInputHidden').click()">
+            <div id="dropZone" class="glass-panel p-12 cursor-pointer" onclick="document.getElementById('fileInputHidden').click()">
                 <div id="uploadStatus" class="flex flex-col items-center">
                     <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-500 mb-6">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
                     </div>
-                    <p class="text-lg font-semibold mb-1">Upload your document</p>
-                    <p class="text-sm text-gray-500 mb-6">Drag & drop or click to browse</p>
+                    <p class="text-lg font-bold mb-1">Click or drag your file here</p>
+                    <p class="text-sm text-gray-500 mb-6 font-medium">Supports PDF, DOCX, PPTX, TXT, & Images</p>
                     
-                    <div class="flex flex-wrap justify-center gap-3">
-                        <span class="flex items-center gap-1 text-xs font-semibold px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded">PDF</span>
-                        <span class="flex items-center gap-1 text-xs font-semibold px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded">DOCX</span>
-                        <span class="flex items-center gap-1 text-xs font-semibold px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded">PPTX</span>
-                        <span class="flex items-center gap-1 text-xs font-semibold px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded">IMAGE (OCR)</span>
-                    </div>
-
-                    <div id="dropZoneStatus" class="mt-6 hidden"></div>
+                    <div id="dropZoneStatus" class="hidden"></div>
                 </div>
             </div>
 
             <input type="file" id="fileInputHidden" accept=".pdf,.docx,.txt,.pptx,.png,.jpg,.jpeg" class="hidden">
         </div>
-    </div>
+    </main>
 
-    <!-- 2. Main Q&A Screen -->
-    <div id="qaScreen" class="max-w-7xl mx-auto p-6 mt-20 hidden">
-        <div class="lg:grid lg:grid-cols-2 lg:gap-10">
+    <!-- 2. QA Screen (Fixed Size Grid) -->
+    <main id="qaScreen" class="hidden">
+        <div class="qa-layout-wrapper">
+            <div class="qa-grid">
 
-            <!-- Document Panel -->
-            <div class="glass-panel flex flex-col mb-8 lg:mb-0 max-h-[85vh]">
-                <div class="p-6 border-b border-slate-200 dark:border-slate-700/50 flex justify-between items-center">
-                    <h2 class="text-xl font-bold">Document Content</h2>
-                    <button onclick="switchScreen('initialScreen')" class="text-sm font-semibold text-indigo-600 hover:text-indigo-400">Upload New</button>
-                </div>
-                
-                <div class="p-4 flex-grow overflow-hidden flex flex-col">
-                    <div class="flex items-center gap-2 mb-4">
-                         <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                         <span id="documentFileName" class="text-sm font-medium truncate opacity-70"></span>
+                <!-- Left Panel: Extraction -->
+                <section class="qa-panel glass-panel">
+                    <div class="p-6 border-b flex justify-between items-center flex-shrink-0">
+                        <h2 class="text-xl font-bold">Document Content</h2>
+                        <button onclick="switchScreen('initialScreen')" class="text-sm font-bold text-indigo-600 hover:text-indigo-400">Change File</button>
                     </div>
-
-                    <!-- Extraction Status -->
-                    <div id="statusMessage" class="status-badge hidden mb-4"></div>
                     
-                    <div id="loadingIndicator" class="flex items-center justify-center p-8 gap-3 hidden">
-                        <div class="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-                        <span class="text-indigo-600 font-medium">Analyzing document...</span>
-                    </div>
-
-                    <div class="flex-grow overflow-y-auto p-4 bg-slate-50/50 dark:bg-slate-900/50 rounded-xl border border-slate-200/50 dark:border-slate-700/30">
-                        <div id="extractedTextDisplay" class="text-sm leading-relaxed whitespace-pre-wrap opacity-80">
-                            <p class="text-gray-400 italic">Processing document text...</p>
+                    <div class="p-4 border-b flex items-center justify-between gap-3 flex-shrink-0">
+                        <div class="flex items-center gap-2 overflow-hidden">
+                             <div class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></div>
+                             <span id="documentFileName" class="text-sm font-semibold truncate opacity-80"></span>
+                        </div>
+                        <div id="loadingIndicator" class="hidden flex items-center gap-2">
+                            <div class="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Chat Panel -->
-            <div class="glass-panel flex flex-col max-h-[85vh]">
-                <div class="p-6 border-b border-slate-200 dark:border-slate-700/50">
-                    <h2 class="text-xl font-bold">AI Assistant</h2>
-                    <p class="text-xs opacity-50 mt-1">Answers are strictly grounded in your document.</p>
-                </div>
+                    <div id="statusMessage" class="status-badge m-4 hidden"></div>
 
-                <div id="chatHistory" class="flex-grow overflow-y-auto p-6 flex flex-col gap-4">
-                    <div class="ai-response">
-                        Hello! I've analyzed your document. What would you like to know about it?
+                    <div class="qa-scroll-area">
+                        <div id="extractedTextDisplay" class="text-sm leading-relaxed whitespace-pre-wrap opacity-90">
+                            <!-- Text appears here -->
+                        </div>
                     </div>
-                </div>
+                </section>
 
-                <div class="chat-footer">
-                    <form id="questionForm" class="flex gap-3">
-                        <input type="text" id="questionInput" placeholder="Ask a question..." class="w-full bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm" disabled>
-                        <button type="submit" id="submitQuestion" class="btn-primary flex items-center justify-center min-w-[3rem]" disabled title="Send">
-                            <svg id="sendIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                            <div id="chatLoading" class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        </button>
-                    </form>
-                </div>
+                <!-- Right Panel: Chat -->
+                <section class="qa-panel glass-panel">
+                    <div class="p-6 border-b flex-shrink-0">
+                        <h2 class="text-xl font-bold">Ask Anything</h2>
+                        <p class="text-xs font-semibold opacity-50 uppercase tracking-wider">AI Analysis Mode</p>
+                    </div>
+
+                    <div id="chatHistory" class="qa-scroll-area flex flex-col gap-4">
+                        <div class="ai-response">
+                            I've analyzed your document. What specific part would you like to discuss or summarize?
+                        </div>
+                    </div>
+
+                    <div class="p-4 border-b dark:border-slate-800 bg-white/30 dark:bg-slate-800/20 flex-shrink-0">
+                        <form id="questionForm" class="flex gap-2">
+                            <input type="text" id="questionInput" placeholder="Ask a question about your document..." class="w-full bg-white/80 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500/40 text-sm font-medium" disabled>
+                            <button type="submit" id="submitQuestion" class="btn-primary flex items-center justify-center p-3" disabled>
+                                <svg id="sendIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                <div id="chatLoading" class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            </button>
+                        </form>
+                    </div>
+                </section>
+
             </div>
         </div>
-    </div>
+    </main>
 
     <!-- Libraries -->
-    <!-- DOCX -->
     <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
-    <!-- PPTX (JSZip) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <!-- OCR -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     
     <script type="module" src="DocuQuery.js"></script>
