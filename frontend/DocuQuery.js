@@ -21,7 +21,6 @@ window.displayStatus = function(message, type = 'warning') {
 window.switchScreen = function(targetId) {
     const initialScreen = document.getElementById('initialScreen');
     const qaScreen = document.getElementById('qaScreen');
-    const mainHeader = document.getElementById('mainHeader');
     
     if (targetId === 'initialScreen') {
         qaScreen.classList.add('hidden');
@@ -31,6 +30,12 @@ window.switchScreen = function(targetId) {
         if (window.toggleChatInputs) window.toggleChatInputs(false);
         const extractedTextDisplay = document.getElementById('extractedTextDisplay');
         if (extractedTextDisplay) extractedTextDisplay.innerHTML = '<p class="text-gray-400 italic">Extracted text will appear here.</p>';
+        
+        const dropZoneStatus = document.getElementById('dropZoneStatus');
+        if (dropZoneStatus) {
+            dropZoneStatus.classList.add('hidden');
+            dropZoneStatus.textContent = '';
+        }
     } else {
         initialScreen.classList.add('hidden');
         qaScreen.classList.remove('hidden');
@@ -66,7 +71,7 @@ window.saveChat = function() {
 // --- CONFIGURATION ---
 
 const MODEL = 'gemini-2.0-flash';
-const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:')
     ? 'http://localhost:3000/api/generate'
     : 'https://docuquery-b68i.onrender.com/api/generate';
 
@@ -233,12 +238,6 @@ async function extractPptxText(file) {
     return fullText.trim();
 }
 
-async function extractImageText(file) {
-    if (!window.Tesseract) throw new Error("Tesseract.js not loaded.");
-    const result = await window.Tesseract.recognize(file, 'eng');
-    return result.data.text;
-}
-
 async function processFile(file) {
     toggleFileLoading(true);
     displayDropZoneStatus(`Processing ${file.name}...`, 'processing');
@@ -260,9 +259,6 @@ async function processFile(file) {
         } else if (ext === 'txt') {
             fileType = 'TXT';
             content = await file.text();
-        } else if (['png', 'jpg', 'jpeg'].includes(ext)) {
-            fileType = 'Image (OCR)';
-            content = await extractImageText(file);
         } else {
             throw new Error(`Unsupported file type: ${ext}`);
         }
@@ -305,10 +301,23 @@ ${extractedText}
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ userQuery, systemPrompt, extractedText, model: MODEL })
         });
-        const result = await response.json();
+        
+        let result;
+        const rawText = await response.text();
+        
+        try {
+            result = JSON.parse(rawText);
+        } catch(e) {
+            result = { error: rawText };
+        }
+        
+        if (!response.ok) {
+            return `API Error (${response.status}): ${result.error?.message || result.error || JSON.stringify(result)}`;
+        }
+        
         return result.text || "No response received.";
     } catch (err) {
-        return `API Error: ${err.message}`;
+        return `Connection Error: ${err.message}. Please physically ensure your backend server (node server.js) is currently running on port 3000.`;
     }
 }
 
