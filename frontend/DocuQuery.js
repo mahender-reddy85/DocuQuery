@@ -33,6 +33,32 @@ window.switchScreen = function(targetId) {
     }
 };
 
+window.saveChat = function() {
+    const chatHistory = document.getElementById('chatHistory');
+    if (!chatHistory) return;
+    
+    let chatText = 'DocuQuery AI Chat Log\n';
+    chatText += '-------------------------------\n\n';
+    
+    const bubbles = chatHistory.querySelectorAll('div > .ai-response, div > .user-query, .custom-ai-bubble, .ai-response, .user-query');
+    bubbles.forEach(bubble => {
+        if (bubble.id === 'aiPlaceholder') return; // Skip thinking indicator
+        const isUser = bubble.classList.contains('user-query');
+        const role = isUser ? 'You' : 'DocuQuery AI';
+        chatText += `${role}:\n${bubble.innerText.trim()}\n\n`;
+    });
+    
+    const blob = new Blob([chatText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `DocuQuery_Chat_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+};
+
 // --- CONFIGURATION ---
 
 const MODEL = 'gemini-2.0-flash';
