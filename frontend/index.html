@@ -5,50 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DocuQuery : Intelligent Q&A</title>
     <link rel="icon" type="image/jpeg" href="./DocuQuery.jpg">
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom Overrides -->
     <link rel="stylesheet" href="./DocuQuery.css">
+    
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body class="light">
+<body class="light bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-50 transition-colors duration-300 flex flex-col h-screen overflow-hidden">
     
-    <!-- Background Sparkles -->
-    <div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10" id="bgAccents"></div>
-
     <!-- Persistent Header -->
-    <header id="mainHeader" class="flex justify-between items-center px-10">
+    <header id="mainHeader" class="flex justify-between items-center px-10 h-20 flex-shrink-0 z-50">
         <div id="brandingContainer" class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m-5 4h8a2 2 0 002-2V7a2 2 0 00-2-2H9a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
             </div>
-            <span class="text-2xl font-extrabold tracking-tight text-slate-800 dark:text-white">DocuQuery</span>
+            <span class="text-2xl font-extrabold tracking-tight dark:text-white">DocuQuery</span>
         </div>
 
-        <button id="themeToggle" aria-label="Toggle theme" class="w-12 h-12 rounded-full flex items-center justify-center hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-all">
-            <svg id="sunIcon" class="w-6 h-6 hidden text-amber-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 7a5 5 0 100 10 5 5 0 000-10zM2 13h2a1 1 0 100-2H2a1 1 0 100 2zm18 0h2a1 1 0 100-2h-2a1 1 0 100 2zM11 2v2a1 1 0 102 0V2a1 1 0 10-2 0zm0 18v2a1 1 0 102 0v-2a1 1 0 10-2 0zM5.99 4.58a1 1 0 111.41 1.41L6.34 7.05a1 1 0 11-1.41-1.41l1.06-1.06zm12.02 12.02a1 1 0 111.41 1.41l-1.06 1.06a1 1 0 11-1.41-1.41l1.06-1.06zm-12.02 1.41a1 1 0 11-1.41-1.41l1.06-1.06a1 1 0 111.41 1.41l-1.06 1.06zm13.43-13.43a1 1 0 11-1.41 1.41l-1.06-1.06a1 1 0 111.41-1.41l1.06 1.06z"/></svg>
-            <svg id="moonIcon" class="w-6 h-6 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+        <button id="themeToggle" aria-label="Toggle theme" class="w-12 h-12 rounded-full flex items-center justify-center hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-all group">
+            <svg id="sunIcon" class="w-6 h-6 hidden text-amber-500 group-hover:rotate-45 transition-transform" fill="currentColor" viewBox="0 0 24 24"><path d="M12 7a5 5 0 100 10 5 5 0 000-10zM2 13h2a1 1 0 100-2H2a1 1 0 100 2zm18 0h2a1 1 0 100-2h-2a1 1 0 100 2zM11 2v2a1 1 0 102 0V2a1 1 0 10-2 0zm0 18v2a1 1 0 102 0v-2a1 1 0 10-2 0zM5.99 4.58a1 1 0 111.41 1.41L6.34 7.05a1 1 0 11-1.41-1.41l1.06-1.06zm12.02 12.02a1 1 0 111.41 1.41l-1.06 1.06a1 1 0 11-1.41-1.41l1.06-1.06zm-12.02 1.41a1 1 0 11-1.41-1.41l1.06-1.06a1 1 0 111.41 1.41l-1.06 1.06zm13.43-13.43a1 1 0 11-1.41 1.41l-1.06-1.06a1 1 0 111.41-1.41l1.06 1.06z"/></svg>
+            <svg id="moonIcon" class="w-6 h-6 text-slate-500 group-hover:-rotate-12 transition-transform" fill="currentColor" viewBox="0 0 24 24"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
         </button>
     </header>
 
     <!-- 1. Initial Upload Screen -->
-    <main id="initialScreen" class="full-screen-center">
+    <main id="initialScreen" class="flex-grow flex items-center justify-center p-4">
         <div class="max-w-xl w-full text-center px-6"> 
-            <h1 class="text-3xl mb-4 leading-tight">
-                Unlock insights <br><span class="text-indigo-600">from your documents</span>
+            <h1 class="text-3xl font-extrabold mb-4 leading-tight tracking-tight">
+                Unlock insights <br><span class="text-indigo-600 dark:text-indigo-400">from your documents</span>
             </h1>
-            <p class="text-lg text-gray-500 mb-10">
+            <p class="text-lg text-slate-500 dark:text-slate-400 mb-10">
                 Instantly extract text and chat with your PDF, Word, PowerPoint, or Text files. Simple, secure, and private.
             </p>
 
-            <div id="dropZone" class="glass-panel p-12 cursor-pointer" onclick="document.getElementById('fileInputHidden').click()">
+            <div id="dropZone" class="glass-panel p-12 cursor-pointer relative border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl transition-all duration-300 hover:border-indigo-500 hover:bg-slate-50 dark:hover:bg-slate-800/50" onclick="document.getElementById('fileInputHidden').click()">
                 <div id="uploadStatus" class="flex flex-col items-center">
-                    <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-500 mb-6">
+                    <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/40 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-6 shadow-sm">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
                     </div>
-                    <p class="text-lg font-bold mb-1">Click or drag your file here</p>
-                    <p class="text-sm text-gray-500 mb-6 font-medium">Supports PDF, DOCX, PPTX, TXT, & Images</p>
+                    <p class="text-xl font-bold mb-2">Click or drag your file here</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium mb-6">Supports PDF, DOCX, PPTX, TXT, & Images</p>
                     
-                    <div id="dropZoneStatus" class="hidden"></div>
+                    <div id="dropZoneStatus" class="hidden font-semibold px-4 py-2 rounded-lg mt-2"></div>
                 </div>
             </div>
 
@@ -57,61 +73,71 @@
     </main>
 
     <!-- 2. QA Screen (Fixed Size Grid) -->
-    <main id="qaScreen" class="hidden">
-        <div class="qa-layout-wrapper">
-            <div class="qa-grid">
+    <main id="qaScreen" class="hidden flex-grow flex flex-col w-full px-6 pb-6 overflow-hidden">
+        <div class="qa-grid w-full max-w-[1400px] mx-auto flex-grow overflow-hidden">
 
-                <!-- Left Panel: Extraction -->
-                <section class="qa-panel glass-panel">
-                    <div class="p-6 border-b flex justify-between items-center flex-shrink-0">
-                        <h2 class="text-xl font-bold">Document Content</h2>
-                        <button onclick="switchScreen('initialScreen')" class="text-sm font-bold text-indigo-600 hover:text-indigo-400">Change File</button>
+            <!-- Left Panel: Document Content -->
+            <section class="qa-panel glass-panel flex flex-col overflow-hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none h-full">
+                <!-- Header of Left Panel -->
+                <div class="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 flex-shrink-0">
+                    <h2 class="text-lg font-bold flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m-5 4h8a2 2 0 002-2V7a2 2 0 00-2-2H9a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        Document Content
+                    </h2>
+                    <button onclick="switchScreen('initialScreen')" class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 hover:underline">Change File</button>
+                </div>
+                
+                <!-- Status/Title Bar -->
+                <div class="px-6 py-3 border-b border-slate-100 dark:border-slate-800/50 flex items-center justify-between gap-3 bg-white dark:bg-slate-900 flex-shrink-0">
+                    <div class="flex items-center gap-3 overflow-hidden">
+                         <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                         <span id="documentFileName" class="text-sm font-medium text-slate-600 dark:text-slate-300 truncate"></span>
                     </div>
-                    
-                    <div class="p-4 border-b flex items-center justify-between gap-3 flex-shrink-0">
-                        <div class="flex items-center gap-2 overflow-hidden">
-                             <div class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></div>
-                             <span id="documentFileName" class="text-sm font-semibold truncate opacity-80"></span>
-                        </div>
-                        <div id="loadingIndicator" class="hidden flex items-center gap-2">
-                            <div class="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-                        </div>
+                    <div id="loadingIndicator" class="hidden flex items-center gap-2 flex-shrink-0">
+                        <div class="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
                     </div>
+                </div>
 
-                    <div id="statusMessage" class="status-badge m-4 hidden"></div>
+                <div id="statusMessage" class="hidden mx-6 mt-4 mb-2 px-4 py-3 rounded-xl border font-semibold text-sm"></div>
 
-                    <div class="qa-scroll-area">
-                        <div id="extractedTextDisplay" class="text-sm leading-relaxed whitespace-pre-wrap opacity-90">
-                            <!-- Text appears here -->
-                        </div>
+                <!-- Text Scroll Area -->
+                <div class="flex-grow overflow-y-auto p-6 bg-slate-50/30 dark:bg-transparent">
+                    <div id="extractedTextDisplay" class="text-sm leading-relaxed whitespace-pre-wrap text-slate-700 dark:text-slate-200">
+                        <!-- Text appears here -->
                     </div>
-                </section>
+                </div>
+            </section>
 
-                <!-- Right Panel: Chat -->
-                <section class="qa-panel glass-panel">
-                    <div class="p-6 border-b flex-shrink-0">
-                        <h2 class="text-xl font-bold">Ask Anything</h2>
-                        <p class="text-xs font-semibold opacity-50 uppercase tracking-wider">AI Analysis Mode</p>
+            <!-- Right Panel: AI Chat -->
+            <section class="qa-panel glass-panel flex flex-col overflow-hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none h-full relative">
+                <!-- Header of Right Panel -->
+                <div class="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 flex-shrink-0">
+                    <h2 class="text-lg font-bold flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                        Ask Anything
+                    </h2>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">AI Analysis</span>
+                </div>
+
+                <!-- Chat Scroll Area -->
+                <div id="chatHistory" class="flex-grow overflow-y-auto p-6 flex flex-col gap-6">
+                    <div class="custom-ai-bubble bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm p-4 rounded-2xl rounded-tl-sm text-slate-800 dark:text-slate-100 self-start max-w-[85%] text-sm leading-relaxed">
+                        I've analyzed your document. What specific part would you like to discuss or summarize?
                     </div>
+                </div>
 
-                    <div id="chatHistory" class="qa-scroll-area flex flex-col gap-4">
-                        <div class="ai-response">
-                            I've analyzed your document. What specific part would you like to discuss or summarize?
-                        </div>
-                    </div>
+                <!-- Input Form -->
+                <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900 flex-shrink-0">
+                    <form id="questionForm" class="flex gap-3">
+                        <input type="text" id="questionInput" placeholder="Ask a question about your document..." class="flex-grow bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 outline-none focus:border-indigo-500 dark:focus:border-indigo-500 transition-colors text-sm font-medium disabled:opacity-50" disabled>
+                        <button type="submit" id="submitQuestion" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 rounded-xl flex items-center justify-center transition-all disabled:opacity-50 disabled:hover:transform-none" disabled>
+                            <svg id="sendIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                            <div id="chatLoading" class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        </button>
+                    </form>
+                </div>
+            </section>
 
-                    <div class="p-4 border-b dark:border-slate-800 bg-white/30 dark:bg-slate-800/20 flex-shrink-0">
-                        <form id="questionForm" class="flex gap-2">
-                            <input type="text" id="questionInput" placeholder="Ask a question about your document..." class="w-full bg-white/80 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500/40 text-sm font-medium" disabled>
-                            <button type="submit" id="submitQuestion" class="btn-primary flex items-center justify-center p-3" disabled>
-                                <svg id="sendIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                                <div id="chatLoading" class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            </button>
-                        </form>
-                    </div>
-                </section>
-
-            </div>
         </div>
     </main>
 
