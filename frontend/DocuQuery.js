@@ -112,9 +112,9 @@ function toggleTheme() {
 
 function displayDropZoneStatus(message, type) {
     if (!dropZoneStatus) return;
-    
+
     let targetClasses = 'mt-4 px-4 py-3 rounded-xl text-sm font-bold w-full text-center shadow-sm border transition-all ';
-    
+
     if (type === 'processing') {
         targetClasses += 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-900/30 dark:border-indigo-800 dark:text-indigo-300 animate-pulse';
     } else if (type === 'error') {
@@ -125,7 +125,7 @@ function displayDropZoneStatus(message, type) {
         dropZoneStatus.textContent = '';
         return;
     }
-    
+
     dropZoneStatus.className = targetClasses;
     dropZoneStatus.textContent = message;
 }
@@ -153,7 +153,7 @@ function scrollChatToBottom() {
 
 function addChatMessage(text, role) {
     const messageDiv = document.createElement('div');
-    messageDiv.classList.add('flex', 'flex-col', 'max-w-[85%]', role === 'user' ? 'self-end' : 'self-start');
+    messageDiv.classList.add('flex', 'flex-col', 'max-w-[95%]', role === 'user' ? 'self-end' : 'self-start');
 
     const bubble = document.createElement('div');
     bubble.classList.add('whitespace-pre-wrap');
@@ -368,7 +368,7 @@ async function processFile(file) {
 
     } catch (error) {
         console.error('Extraction Error:', error);
-        
+
         // Fulfill UX expectation: transition to QA Screen but display central empty-state natively inside the preview container
         extractedText = "";
         documentFileName.textContent = file.name;
@@ -379,11 +379,11 @@ async function processFile(file) {
             <p class="text-sm max-w-sm mb-6 leading-relaxed">This document appears to contain only images or scans. We process structural text, so a readable preview cannot be generated for images.</p>
             <div class="text-[11px] bg-rose-50 dark:bg-rose-900/30 px-3 py-2 rounded-lg text-rose-600 dark:text-rose-400 font-mono shadow-sm border border-rose-100 dark:border-rose-900/50">Log: ${error.message}</div>
         </div>`;
-        
+
         window.switchScreen('qaScreen');
         window.displayStatus(`Failed`, 'error');
         window.toggleChatInputs(false);
-        
+
         // Add one initial AI bubble explaining the limitation
         chatHistory.innerHTML = '';
         addChatMessage("I see you selected a document, but I am unable to read any text from it because it appears to be composed entirely of images or scans. Please upload a standard text document if you would like me to analyze it.", "ai");

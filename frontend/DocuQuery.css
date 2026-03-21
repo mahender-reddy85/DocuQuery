@@ -14,12 +14,15 @@
 
 /* Hide scrollbar for horizontal scrolling elements (like Suggested Questions) */
 .hide-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none;    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
 }
 
 .hide-scrollbar::-webkit-scrollbar {
-    display: none;            /* Chrome, Safari, Opera */
+    display: none;
+    /* Chrome, Safari, Opera */
 }
 
 /* AI and User Chat Bubbles */
