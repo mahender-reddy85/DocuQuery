@@ -353,7 +353,8 @@ async function processFile(file) {
             throw new Error(`Unsupported file type: ${ext}`);
         }
 
-        if (!content || content.length < 5) {
+        content = content ? content.trim() : "";
+        if (content.length < 5) {
             throw new Error("No readable text found in document.");
         }
 
