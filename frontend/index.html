@@ -31,11 +31,10 @@
 </head>
 <body class="light bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-50 transition-colors duration-300 flex flex-col h-screen overflow-hidden">
     
-    <!-- Persistent Header -->
-    <header id="mainHeader" class="flex justify-between items-center px-10 h-20 flex-shrink-0 z-50">
+    <header id="mainHeader" class="w-full flex justify-between items-center px-10 h-20 flex-shrink-0 z-50">
         <div id="brandingContainer" class="flex items-center gap-3">
             <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m-5 4h8a2 2 0 002-2V7a2 2 0 00-2-2H9a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m5.231 13.481L15 17.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9zm3.75 11.625a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
             </div>
             <span class="text-2xl font-extrabold tracking-tight dark:text-white">DocuQuery</span>
         </div>
@@ -59,7 +58,7 @@
             <div id="dropZone" class="glass-panel p-12 cursor-pointer relative border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl transition-all duration-300 hover:border-indigo-500 hover:bg-slate-50 dark:hover:bg-slate-800/50" onclick="document.getElementById('fileInputHidden').click()">
                 <div id="uploadStatus" class="flex flex-col items-center">
                     <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/40 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-6 shadow-sm">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
                     </div>
                     <p class="text-xl font-bold mb-2">Click or drag your file here</p>
                     <p class="text-sm text-slate-500 dark:text-slate-400 font-medium mb-6">Supports PDF, DOCX, PPTX, TXT, & Images</p>
@@ -74,14 +73,14 @@
 
     <!-- 2. QA Screen (Fixed Size Grid) -->
     <main id="qaScreen" class="hidden flex-grow flex flex-col w-full px-6 pb-6 overflow-hidden">
-        <div class="qa-grid w-full max-w-[1400px] mx-auto flex-grow overflow-hidden">
+        <div class="grid lg:grid-cols-[45%_55%] gap-6 w-full max-w-[1400px] mx-auto flex-grow overflow-hidden">
 
             <!-- Left Panel: Document Content -->
             <section class="qa-panel glass-panel flex flex-col overflow-hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none h-full">
                 <!-- Header of Left Panel -->
                 <div class="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 flex-shrink-0">
                     <h2 class="text-lg font-bold flex items-center gap-2">
-                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m-5 4h8a2 2 0 002-2V7a2 2 0 00-2-2H9a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
                         Document Content
                     </h2>
                     <button onclick="switchScreen('initialScreen')" class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 hover:underline">Change File</button>
@@ -113,7 +112,7 @@
                 <!-- Header of Right Panel -->
                 <div class="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 flex-shrink-0">
                     <h2 class="text-lg font-bold flex items-center gap-2">
-                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" /></svg>
                         Ask Anything
                     </h2>
                     <span class="text-xs font-bold text-slate-400 uppercase tracking-wider bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">AI Analysis</span>
@@ -131,7 +130,7 @@
                     <form id="questionForm" class="flex gap-3">
                         <input type="text" id="questionInput" placeholder="Ask a question about your document..." class="flex-grow bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 outline-none focus:border-indigo-500 dark:focus:border-indigo-500 transition-colors text-sm font-medium disabled:opacity-50" disabled>
                         <button type="submit" id="submitQuestion" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 rounded-xl flex items-center justify-center transition-all disabled:opacity-50 disabled:hover:transform-none" disabled>
-                            <svg id="sendIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                            <svg id="sendIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
                             <div id="chatLoading" class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         </button>
                     </form>

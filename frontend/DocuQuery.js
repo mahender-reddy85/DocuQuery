@@ -22,8 +22,6 @@ window.switchScreen = function(targetId) {
     if (targetId === 'initialScreen') {
         qaScreen.classList.add('hidden');
         initialScreen.classList.remove('hidden');
-        mainHeader.classList.add('absolute');
-        mainHeader.classList.remove('relative');
         
         // Reset state
         if (window.toggleChatInputs) window.toggleChatInputs(false);
@@ -32,8 +30,6 @@ window.switchScreen = function(targetId) {
     } else {
         initialScreen.classList.add('hidden');
         qaScreen.classList.remove('hidden');
-        mainHeader.classList.remove('absolute');
-        mainHeader.classList.add('relative');
     }
 };
 
@@ -62,10 +58,12 @@ let themeToggle, sunIcon, moonIcon;
 
 function applyTheme(isDark) {
     if (isDark) {
+        document.documentElement.classList.add('dark');
         document.body.classList.add('dark');
         moonIcon.classList.add('hidden');
         sunIcon.classList.remove('hidden');
     } else {
+        document.documentElement.classList.remove('dark');
         document.body.classList.remove('dark');
         moonIcon.classList.remove('hidden');
         sunIcon.classList.add('hidden');
