@@ -112,16 +112,22 @@ function toggleTheme() {
 
 function displayDropZoneStatus(message, type) {
     if (!dropZoneStatus) return;
-    dropZoneStatus.textContent = message;
-    dropZoneStatus.className = 'status-badge mt-4';
-
-    if (type === 'processing') dropZoneStatus.classList.add('status-warning');
-    else if (type === 'error') dropZoneStatus.classList.add('status-error');
-    else {
-        dropZoneStatus.classList.add('hidden');
+    
+    let targetClasses = 'mt-4 px-4 py-3 rounded-xl text-sm font-bold w-full text-center shadow-sm border transition-all ';
+    
+    if (type === 'processing') {
+        targetClasses += 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-900/30 dark:border-indigo-800 dark:text-indigo-300 animate-pulse';
+    } else if (type === 'error') {
+        targetClasses += 'bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-900/30 dark:border-rose-800 dark:text-rose-300 transform scale-[1.02] shadow-md border-2';
+        message = `⚠️ ${message}`; // Prepend alert icon
+    } else {
+        dropZoneStatus.className = 'hidden';
+        dropZoneStatus.textContent = '';
         return;
     }
-    dropZoneStatus.classList.remove('hidden');
+    
+    dropZoneStatus.className = targetClasses;
+    dropZoneStatus.textContent = message;
 }
 
 window.askSuggested = function (query) {
