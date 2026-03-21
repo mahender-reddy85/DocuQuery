@@ -315,6 +315,7 @@ async function extractRawBinaryText(file) {
 }
 
 async function processFile(file) {
+    window.switchScreen('initialScreen');
     toggleFileLoading(true);
     displayDropZoneStatus(`Processing ${file.name}...`, 'processing');
 
