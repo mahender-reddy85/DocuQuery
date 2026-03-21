@@ -374,8 +374,8 @@ async function processFile(file) {
         extractedTextDisplay.innerHTML = `
         <div class="flex flex-col items-center justify-center p-8 text-center h-full text-slate-500 dark:text-slate-400 mt-12">
             <svg class="w-16 h-16 mb-4 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
-            <h3 class="text-xl font-bold mb-2 text-slate-700 dark:text-slate-200">No preview or text available</h3>
-            <p class="text-sm max-w-sm mb-6 leading-relaxed">We could not extract any readable text. The document may be a scanned image, completely empty, password-protected, or heavily damaged.</p>
+            <h3 class="text-xl font-bold mb-2 text-slate-700 dark:text-slate-200">No text readable</h3>
+            <p class="text-sm max-w-sm mb-6 leading-relaxed">This document appears to contain only images or scans. We process structural text, so a readable preview cannot be generated for images.</p>
             <div class="text-[11px] bg-rose-50 dark:bg-rose-900/30 px-3 py-2 rounded-lg text-rose-600 dark:text-rose-400 font-mono shadow-sm border border-rose-100 dark:border-rose-900/50">Log: ${error.message}</div>
         </div>`;
         
@@ -385,7 +385,7 @@ async function processFile(file) {
         
         // Add one initial AI bubble explaining the limitation
         chatHistory.innerHTML = '';
-        addChatMessage("I see you selected a document, but I'm unable to read any text from it because it was empty, scanned, or damaged. Please select a different file format utilizing readable text data.", "ai");
+        addChatMessage("I see you selected a document, but I am unable to read any text from it because it appears to be composed entirely of images or scans. Please upload a standard text document if you would like me to analyze it.", "ai");
 
     } finally {
         toggleFileLoading(false);
