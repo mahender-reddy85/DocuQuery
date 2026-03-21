@@ -1,6 +1,8 @@
 // Define displayStatus globally first, as it's needed by both the module and switchScreen
 window.displayStatus = function(message, type = 'warning') {
     const statusMessage = document.getElementById('statusMessage');
+    if (!statusMessage) return;
+    
     statusMessage.textContent = message;
     // Base classes for the status box
     statusMessage.className = 'mt-2 p-3 text-sm rounded-lg border';
@@ -31,8 +33,8 @@ window.switchScreen = function(targetId) {
     const qaScreen = document.getElementById('qaScreen');
     const documentFileName = document.getElementById('documentFileName');
     const extractedTextDisplay = document.getElementById('extractedTextDisplay');
-    const brandingContainer = document.getElementById('brandingContainer'); // Branding element
-    const mainHeader = document.getElementById('mainHeader'); // Header element
+    const brandingContainer = document.getElementById('brandingContainer');
+    const mainHeader = document.getElementById('mainHeader');
     const dropZoneStatus = document.getElementById('dropZoneStatus');
 
     if (targetId === 'initialScreen') {
@@ -45,7 +47,7 @@ window.switchScreen = function(targetId) {
 
         brandingContainer.classList.remove('hidden'); // Show branding
 
-        // FIX: Clear the drop zone status message when returning to initial screen
+        // Clear the drop zone status message when returning to initial screen
         if (dropZoneStatus) {
             dropZoneStatus.textContent = '';
             dropZoneStatus.classList.add('hidden');
@@ -54,8 +56,10 @@ window.switchScreen = function(targetId) {
         // Clear state when returning to upload screen
         documentFileName.textContent = '';
         extractedTextDisplay.innerHTML = '<p class="text-gray-400 italic">Extracted text will appear here.</p>';
-        toggleChatInputs(false);
-        window.displayStatus('Awaiting file upload (PDF, DOCX, TXT, or PPTX).', 'warning');
+        
+        // Use the global function to update inputs (will be defined later in module)
+        if (window.toggleChatInputs) window.toggleChatInputs(false);
+        window.displayStatus('Awaiting file upload (PDF, DOCX, TXT).', 'warning');
     } else {
         initialScreen.classList.add('hidden');
         qaScreen.classList.remove('hidden');
@@ -68,32 +72,32 @@ window.switchScreen = function(targetId) {
     }
 };
 
-// --- 1. CONFIGURATION AND IMPORTS ---
+// --- CONFIGURATION ---
 
-// Gemini API Configuration
-// SECURITY: Do NOT store API keys in client-side code.
-// API calls are made to a secure remote proxy endpoint.
+// Gemini model choice
 const MODEL = 'gemini-2.0-flash';
 
-// Global variables (now scoped within the module)
+// API Configuration
+// For local development, use: http://localhost:3000/api/generate
+// For production, use your deployed server URL
+const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:3000/api/generate'
+    : 'https://docuquery-b68i.onrender.com/api/generate';
+
+// --- STATE ---
+
 let extractedText = null;
-// Element variables (will be assigned in setupEventListeners)
+let getDocument;
+let mammoth;
+
+// Element references
 let fileInputHidden, dropZone, dropZoneStatus, initialScreen, qaScreen, documentFileName;
 let questionForm, questionInput, submitQuestionButton, chatHistory, extractedTextDisplay;
 let loadingIndicator, statusMessage, chatLoading, sendIcon;
 let themeToggle, sunIcon, moonIcon;
 
+// --- UTILITY FUNCTIONS ---
 
-// Client-side Library Imports (via CDN)
-let getDocument;
-let mammoth; // Tesseract removed
-
-// --- 2. UTILITY FUNCTIONS ---
-
-/**
- * Applies the theme classes and icons.
- * @param {boolean} isDark
- */
 function applyTheme(isDark) {
     if (isDark) {
         document.body.classList.add('dark');
@@ -106,9 +110,6 @@ function applyTheme(isDark) {
     }
 }
 
-/**
- * Toggles the theme between light and dark.
- */
 function toggleTheme() {
     const isDark = document.body.classList.contains('dark');
     const newTheme = isDark ? 'light' : 'dark';
@@ -116,33 +117,22 @@ function toggleTheme() {
     applyTheme(newTheme === 'dark');
 }
 
-/**
- * Displays a status message in the drop zone area.
- * @param {string} message
- * @param {'error' | 'processing' | 'hidden'} type
- */
 function displayDropZoneStatus(message, type) {
+    if (!dropZoneStatus) return;
     dropZoneStatus.textContent = message;
-    // Clear all color and visibility classes first
     dropZoneStatus.classList.remove('hidden', 'text-blue-500', 'text-red-500', 'dark:text-blue-300', 'dark:text-red-300');
 
     if (type === 'processing') {
-        // Processing status colors
         dropZoneStatus.classList.add('text-blue-500', 'dark:text-blue-300');
     } else if (type === 'error') {
-        // Error status colors
         dropZoneStatus.classList.add('text-red-500', 'dark:text-red-300');
-    } else { // 'hidden' or standard
+    } else {
         dropZoneStatus.classList.add('hidden');
         return;
     }
     dropZoneStatus.classList.remove('hidden');
 }
 
-
-/**
- * Converts a File or Blob into an ArrayBuffer.
- */
 function readFileAsArrayBuffer(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -152,16 +142,10 @@ function readFileAsArrayBuffer(file) {
     });
 }
 
-/**
- * Scrolls the chat history to the bottom.
- */
 function scrollChatToBottom() {
     chatHistory.scrollTop = chatHistory.scrollHeight;
 }
 
-/**
- * Adds a message to the chat history.
- */
 function addChatMessage(text, role) {
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('max-w-[85%]', 'whitespace-pre-wrap');
@@ -169,24 +153,20 @@ function addChatMessage(text, role) {
     if (role === 'user') {
         messageDiv.classList.add('user-query', 'self-end');
     } else {
-        messageDiv.classList.add('ai-response', 'self-start'); // Dark mode is applied via CSS hook
+        messageDiv.classList.add('ai-response', 'self-start');
     }
-    messageDiv.innerHTML = text.replace(/\n/g, '<br>'); // Preserve line breaks
+    messageDiv.innerHTML = text.replace(/\n/g, '<br>');
 
     chatHistory.appendChild(messageDiv);
     scrollChatToBottom();
 }
 
-/**
- * Toggles the loading state for the Q&A section.
- */
 function toggleChatLoading(isLoading) {
     questionInput.disabled = isLoading;
     submitQuestionButton.disabled = isLoading;
     chatLoading.classList.toggle('hidden', !isLoading);
     sendIcon.classList.toggle('hidden', isLoading);
     if (isLoading) {
-        // Add a temporary AI placeholder
         const placeholder = document.createElement('div');
         placeholder.id = 'aiPlaceholder';
         placeholder.classList.add('ai-response', 'self-start');
@@ -194,32 +174,23 @@ function toggleChatLoading(isLoading) {
         chatHistory.appendChild(placeholder);
         scrollChatToBottom();
     } else {
-        // Remove placeholder
         const placeholder = document.getElementById('aiPlaceholder');
         if (placeholder) placeholder.remove();
     }
 }
 
-/**
- * Enables/Disables the chat input section.
- */
-function toggleChatInputs(enable) {
-    questionInput.disabled = !enable;
-    submitQuestionButton.disabled = !enable;
-}
+// Make toggleChatInputs global so switchScreen can access it
+window.toggleChatInputs = function(enable) {
+    if (questionInput) questionInput.disabled = !enable;
+    if (submitQuestionButton) submitQuestionButton.disabled = !enable;
+};
 
-/**
- * Toggles the main file extraction loading state.
- */
 function toggleFileLoading(isLoading) {
     loadingIndicator.classList.toggle('hidden', !isLoading);
 }
 
-// --- 3. EXTRACTION FUNCTIONS ---
+// --- EXTRACTION ---
 
-/**
- * Extracts text from a DOCX file using mammoth.js.
- */
 async function extractDocxText(file) {
     if (!mammoth) throw new Error("mammoth.js not loaded.");
     const arrayBuffer = await readFileAsArrayBuffer(file);
@@ -227,9 +198,6 @@ async function extractDocxText(file) {
     return result.value;
 }
 
-/**
- * Extracts text from a PDF file using pdf.js.
- */
 async function extractPdfText(file) {
     if (!getDocument) throw new Error("PDF.js getDocument not initialized.");
     const arrayBuffer = await readFileAsArrayBuffer(file);
@@ -244,18 +212,13 @@ async function extractPdfText(file) {
     return fullText.trim();
 }
 
-/**
- * Handles the main file upload and calls the correct extractor.
- * @param {File} file - The file object to process.
- */
 async function processFile(file) {
-    // Check for unsupported files first (PPTX is in UI but not implemented)
+    // PPTX check
     if (file.name.endsWith('.pptx') || file.type.includes('officedocument.presentationml')) {
          displayDropZoneStatus(`PPTX files are currently not supported for extraction. Please use PDF, DOCX, or TXT.`, 'error');
          return;
     }
 
-    // Reset UI states
     toggleFileLoading(true);
     displayDropZoneStatus(`Processing file: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)...`, 'processing');
     extractedTextDisplay.textContent = 'Processing...';
@@ -275,7 +238,6 @@ async function processFile(file) {
             fileType = 'TXT';
             extractedContent = await file.text();
         } else {
-            // Removed image handling
             throw new Error(`Unsupported file type: ${mimeType}. Please use PDF, DOCX, or TXT.`);
         }
 
@@ -283,18 +245,15 @@ async function processFile(file) {
             extractedText = null;
             extractedTextDisplay.textContent = 'No text could be extracted from this file.';
             displayDropZoneStatus(`Extraction failed: No readable text found in ${fileType}.`, 'error');
-            toggleChatInputs(false);
+            window.toggleChatInputs(false);
         } else {
             extractedText = extractedContent;
             documentFileName.textContent = file.name;
             extractedTextDisplay.textContent = extractedContent;
 
-            // Successful transition to Q&A screen
-            window.switchScreen('qaScreen'); // Use global function
-
-            // Update status on the Q&A screen using the global function
+            window.switchScreen('qaScreen');
             window.displayStatus(`Successfully extracted text from ${fileType}. Ready for Q&A!`, 'success');
-            toggleChatInputs(true);
+            window.toggleChatInputs(true);
         }
 
     } catch (error) {
@@ -302,10 +261,9 @@ async function processFile(file) {
         extractedText = null;
         extractedTextDisplay.textContent = `Error during extraction: ${error.message}`;
         displayDropZoneStatus(`An error occurred during extraction: ${error.message}`, 'error');
-        toggleChatInputs(false);
+        window.toggleChatInputs(false);
     } finally {
         toggleFileLoading(false);
-        // Clear drop zone status if still on the initial screen, for error recovery
         if (qaScreen.classList.contains('hidden')) {
              setTimeout(() => {
                  displayDropZoneStatus('', 'hidden');
@@ -314,28 +272,14 @@ async function processFile(file) {
     }
 }
 
-/**
- * Handles file selection from the hidden input.
- */
 function handleFileInputChange() {
-     console.log('handleFileInputChange called');
      const file = fileInputHidden.files[0];
-     console.log('Selected file:', file);
-     if (file) {
-         processFile(file);
-     } else {
-         console.log('No file selected');
-     }
+     if (file) processFile(file);
 }
 
+// --- API ---
 
-// --- 4. GEMINI API CALL (RAG/Grounded) ---
-
-/**
- * Calls the Gemini API with the document text as system instruction.
- */
 async function callGeminiApi(userQuery) {
-    // The prompt strictly limits the AI to the provided document text
     const systemPrompt = `You are an expert Q&A system. Your sole source of information is the document provided. You MUST only answer the user's question using the text found in the document provided within the triple backticks. Do not use any external knowledge.
 
 If the answer is not available in the provided text, you MUST respond with the exact phrase: "I cannot find that information in the document."
@@ -346,16 +290,14 @@ ${extractedText}
 \`\`\``;
 
     try {
-        const response = await fetch("https://docuquery-b68i.onrender.com/api/generate", {
+        const response = await fetch(API_URL, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                userQuery: userQuery,
-                systemPrompt: systemPrompt,
-                extractedText: extractedText,
-                model: "gemini-2.0-flash"
+                userQuery,
+                systemPrompt,
+                extractedText,
+                model: MODEL
             })
         });
 
@@ -367,38 +309,27 @@ ${extractedText}
     }
 }
 
+// --- EVENT HANDLERS ---
 
-// --- 5. EVENT HANDLERS ---
-
-/**
- * Handles the submission of the user's question.
- */
 async function handleAskQuestion(e) {
     e.preventDefault();
     const userQuery = questionInput.value.trim();
 
     if (!userQuery) return;
     if (!extractedText) {
-        // Use global displayStatus to update UI (it references the element directly)
         window.displayStatus('Please extract text from a document first!', 'error');
         return;
     }
 
-    // 1. Display user query
     addChatMessage(userQuery, 'user');
-    questionInput.value = ''; // Clear input
+    questionInput.value = '';
 
-    // 2. Call API
     toggleChatLoading(true);
     const aiResponse = await callGeminiApi(userQuery);
     toggleChatLoading(false);
 
-    // 3. Display AI response
     addChatMessage(aiResponse, 'ai');
 }
-
-
-// --- 6. DRAG AND DROP HANDLERS ---
 
 function handleDragOver(e) {
     e.preventDefault();
@@ -413,11 +344,9 @@ function handleDragLeave(e) {
 function handleDrop(e) {
     e.preventDefault();
     dropZone.classList.remove('drag-over');
-    console.log('handleDrop called');
     const file = e.dataTransfer.files[0];
-    console.log('Dropped file:', file);
+    if (!file) return;
 
-    // Check file type before processing
     const acceptedTypes = ['.pdf', '.docx', '.txt', '.pptx'];
     const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
 
@@ -426,20 +355,14 @@ function handleDrop(e) {
          return;
     }
 
-    if (file) {
-        // Manually assign the file to the hidden input to use the existing change handler
-        fileInputHidden.files = e.dataTransfer.files;
-        processFile(file);
-    } else {
-        console.log('No file in drop event');
-    }
+    fileInputHidden.files = e.dataTransfer.files;
+    processFile(file);
 }
 
-
-// --- 7. INITIALIZATION ---
+// --- INITIALIZATION ---
 
 async function setupEventListeners() {
-    // Assign element references
+    // References
     fileInputHidden = document.getElementById('fileInputHidden');
     dropZone = document.getElementById('dropZone');
     dropZoneStatus = document.getElementById('dropZoneStatus');
@@ -459,53 +382,34 @@ async function setupEventListeners() {
     sunIcon = document.getElementById('sunIcon');
     moonIcon = document.getElementById('moonIcon');
 
-    // Theme setup
+    // Theme
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
-    applyTheme(initialDark);
+    applyTheme(savedTheme === 'dark' || (!savedTheme && prefersDark));
     themeToggle.addEventListener('click', toggleTheme);
 
-    // PDF.js Fix: Dynamically import and configure PDF.js
+    // PDF.js
     try {
         const pdfModule = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs');
-
         getDocument = pdfModule.getDocument;
-        const GlobalWorkerOptions = pdfModule.GlobalWorkerOptions;
-
-        if (GlobalWorkerOptions) {
-            const pdfWorkerUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
-            GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
-        } else {
-            console.error("PDF.js GlobalWorkerOptions not found. PDF processing may fail.");
+        if (pdfModule.GlobalWorkerOptions) {
+            pdfModule.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
         }
     } catch (error) {
-        console.error("Failed to dynamically import PDF.js modules:", error);
+        console.error("Failed to load PDF.js:", error);
     }
 
-    // Load mammoth.js (Tesseract removed)
+    // Mammoth
     mammoth = window.mammoth;
 
-    // --- Attach Listeners ---
-
-    // File Upload (Click)
+    // Listeners
     fileInputHidden.addEventListener('change', handleFileInputChange);
-
-    // File Upload (Drag and Drop)
     dropZone.addEventListener('dragover', handleDragOver);
     dropZone.addEventListener('dragleave', handleDragLeave);
     dropZone.addEventListener('drop', handleDrop);
-
-    // Q&A Form
     questionForm.addEventListener('submit', handleAskQuestion);
 
-    // Set initial screen state
-    window.switchScreen('initialScreen'); // Use global function for initial setup
+    window.switchScreen('initialScreen');
 }
 
-// Delay execution until the window is fully loaded to ensure all CDNs are available
-window.onload = function() {
-    console.log('Window loaded, setting up event listeners...');
-    setupEventListeners();
-    console.log('Event listeners setup complete');
-};
+window.onload = setupEventListeners;

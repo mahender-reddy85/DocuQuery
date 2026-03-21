@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 
 const app = express();
@@ -53,7 +54,7 @@ app.post('/api/generate', async (req, res) => {
     const API_ENDPOINT = 
       `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
-    // ----- FIX 1: Proper Gemini request structure -----
+    // ----- Proper Gemini request structure -----
     const payload = {
       contents: [
         {
@@ -83,7 +84,7 @@ app.post('/api/generate', async (req, res) => {
 
     const json = JSON.parse(raw);
 
-    // ----- FIX 2: Robust extraction (covers ALL formats) -----
+    // ----- Robust extraction (covers ALL formats) -----
     let text = null;
 
     // Standard response
@@ -104,7 +105,7 @@ app.post('/api/generate', async (req, res) => {
     }
 
     // Final fallback: force a readable string
-    if (!text) text = "I'm sorry — the model returned no readable text.";
+    if (!text) text = "I'm sorry ? the model returned no readable text.";
 
     return res.json({ text });
 
