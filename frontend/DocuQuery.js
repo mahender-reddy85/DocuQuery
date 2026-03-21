@@ -256,8 +256,8 @@ async function processFile(file) {
         } else if (ext === 'pptx') {
             fileType = 'PPTX';
             content = await extractPptxText(file);
-        } else if (ext === 'txt') {
-            fileType = 'TXT';
+        } else if (['txt', 'md', 'markdown'].includes(ext) || file.name.toLowerCase() === 'readme') {
+            fileType = (ext === 'md' || ext === 'markdown') ? 'Markdown' : 'Text';
             content = await file.text();
         } else {
             throw new Error(`Unsupported file type: ${ext}`);
@@ -377,11 +377,39 @@ function setupEventListeners() {
         if (fileInputHidden.files[0]) processFile(fileInputHidden.files[0]);
     });
     
-    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-    dropZone.addEventListener('dragleave', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); });
-    dropZone.addEventListener('drop', e => {
+    // Global Drag & Drop Overlay Logic
+    let dragCounter = 0;
+    const overlay = document.getElementById('globalDragOverlay');
+
+    window.addEventListener('dragenter', e => {
         e.preventDefault();
-        dropZone.classList.remove('drag-over');
+        dragCounter++;
+        if (dragCounter === 1 && overlay) {
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        }
+    });
+
+    window.addEventListener('dragleave', e => {
+        e.preventDefault();
+        dragCounter--;
+        if (dragCounter === 0 && overlay) {
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        }
+    });
+
+    window.addEventListener('dragover', e => {
+        e.preventDefault();
+    });
+
+    window.addEventListener('drop', e => {
+        e.preventDefault();
+        dragCounter = 0;
+        if (overlay) {
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        }
         if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
     });
 
