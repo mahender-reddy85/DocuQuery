@@ -182,7 +182,7 @@ function toggleChatLoading(isLoading) {
     if (isLoading) {
         const placeholder = document.createElement('div');
         placeholder.id = 'aiPlaceholder';
-        placeholder.classList.add('flex', 'flex-col', 'max-w-[85%]', 'self-start');
+        placeholder.classList.add('flex', 'flex-col', 'max-w-[95%]', 'self-start');
 
         const bubble = document.createElement('div');
         bubble.classList.add('ai-response');
