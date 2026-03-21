@@ -238,6 +238,42 @@ async function extractPptxText(file) {
     return fullText.trim();
 }
 
+async function extractRtfText(file) {
+    const text = await file.text();
+    // Basic RTF strip regex
+    return text.replace(/\\([a-z]{1,32})(-?\d+)? ?/gi, ' ').replace(/[{}]/g, '').trim();
+}
+
+async function extractOdfText(file) {
+    if (!window.JSZip) throw new Error("JSZip not loaded.");
+    const zip = await window.JSZip.loadAsync(file);
+    if (!zip.files["content.xml"]) throw new Error("Invalid ODF document.");
+    
+    const xmlText = await zip.files["content.xml"].async("string");
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+    const textNodes = xmlDoc.getElementsByTagName("text:p");
+    
+    let fullText = '';
+    for (let i = 0; i < textNodes.length; i++) {
+        fullText += textNodes[i].textContent + "\n\n";
+    }
+    return fullText.trim();
+}
+
+async function extractRawBinaryText(file) {
+    const buffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    let text = "";
+    for (let i = 0; i < bytes.length; i++) {
+        const char = bytes[i];
+        if ((char >= 32 && char <= 126) || char === 10 || char === 13) {
+            text += String.fromCharCode(char);
+        }
+    }
+    return text.replace(/[^\x20-\x7E\n\r]/g, '').trim();
+}
+
 async function processFile(file) {
     toggleFileLoading(true);
     displayDropZoneStatus(`Processing ${file.name}...`, 'processing');
@@ -253,11 +289,24 @@ async function processFile(file) {
         } else if (ext === 'docx') {
             fileType = 'DOCX';
             content = await extractDocxText(file);
-        } else if (ext === 'pptx') {
-            fileType = 'PPTX';
+        } else if (['pptx', 'ppsx'].includes(ext)) {
+            fileType = ext.toUpperCase();
             content = await extractPptxText(file);
-        } else if (['txt', 'md', 'markdown'].includes(ext) || file.name.toLowerCase() === 'readme') {
-            fileType = (ext === 'md' || ext === 'markdown') ? 'Markdown' : 'Text';
+        } else if (['odt', 'odp'].includes(ext)) {
+            fileType = ext.toUpperCase();
+            content = await extractOdfText(file);
+        } else if (ext === 'rtf') {
+            fileType = 'RTF';
+            content = await extractRtfText(file);
+        } else if (['doc', 'ppt', 'pages', 'key', 'wps'].includes(ext)) {
+            fileType = ext.charAt(0).toUpperCase() + ext.slice(1);
+            content = await extractRawBinaryText(file);
+        } else if (['txt', 'md', 'markdown', 'html', 'htm', 'xml', 'latex', 'tex'].includes(ext) || file.name.toLowerCase() === 'readme') {
+            if (['html', 'htm'].includes(ext)) fileType = 'HTML';
+            else if (ext === 'xml') fileType = 'XML';
+            else if (['latex', 'tex'].includes(ext)) fileType = 'LaTeX';
+            else if (['md', 'markdown'].includes(ext) || file.name.toLowerCase() === 'readme') fileType = 'Markdown';
+            else fileType = 'Text';
             content = await file.text();
         } else {
             throw new Error(`Unsupported file type: ${ext}`);
