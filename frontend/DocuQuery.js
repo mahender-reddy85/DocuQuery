@@ -171,10 +171,32 @@ async function extractPdfText(file) {
     const buffer = await file.arrayBuffer();
     const pdf = await getDocument({ data: buffer }).promise;
     let fullText = '';
+    
     for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        fullText += textContent.items.map(item => item.str).join(' ') + '\n\n';
+        
+        let lastY = null;
+        let text = '';
+        
+        for (let item of textContent.items) {
+            // If the absolute Y coordinate changes by more than 5 points, assume it's a new line.
+            if (lastY !== null && Math.abs(item.transform[5] - lastY) > 4) {
+                 text += '\n';
+            } else if (lastY !== null && text.length > 0 && !text.endsWith(' ') && !text.endsWith('\n')) {
+                 // Add a space between words on the same line if they don't already touch
+                 text += ' ';
+            }
+            text += item.str;
+            if (item.hasEOL) {
+                 text += '\n';
+            }
+            lastY = item.transform[5];
+        }
+        
+        // Clean up formatting
+        text = text.replace(/ +/g, ' ').replace(/\n /g, '\n');
+        fullText += text + '\n\n';
     }
     return fullText.trim();
 }
