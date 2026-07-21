@@ -7,7 +7,6 @@
     <title>DocuQuery : Intelligent Q&A</title>
     <link rel="icon" type="image/jpeg" href="./DocuQuery.jpg">
 
-    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -22,10 +21,8 @@
         }
     </script>
 
-    <!-- Custom Overrides -->
     <link rel="stylesheet" href="./DocuQuery.css">
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -34,7 +31,6 @@
 <body
     class="light bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-50 transition-colors duration-300 flex flex-col lg:h-screen lg:overflow-hidden min-h-screen overflow-y-auto w-full">
 
-    <!-- Global Drag Overlay -->
     <div id="globalDragOverlay"
         class="fixed inset-0 z-[100] hidden bg-indigo-500/10 backdrop-blur-sm border-[4px] border-indigo-500/50 border-dashed rounded-3xl m-6 flex-col items-center justify-center transition-all duration-300 pointer-events-none">
         <div class="bg-indigo-600 text-white p-6 rounded-full shadow-2xl animate-bounce">
@@ -73,7 +69,6 @@
         </button>
     </header>
 
-    <!-- 1. Initial Upload Screen -->
     <main id="initialScreen" class="flex-grow flex items-center justify-center p-4">
         <div class="max-w-xl w-full text-center px-6">
             <h1 class="text-4xl font-extrabold mb-6 leading-tight tracking-tight drop-shadow-sm">
@@ -144,15 +139,12 @@
         </div>
     </main>
 
-    <!-- 2. QA Screen (Fixed Size Grid) -->
     <main id="qaScreen" class="hidden flex-grow flex flex-col w-full px-4 lg:px-6 pb-6 lg:overflow-hidden">
         <div
             class="grid grid-cols-1 lg:grid-cols-[45%_55%] gap-6 w-full max-w-[1400px] mx-auto lg:flex-grow lg:overflow-hidden min-h-0">
 
-            <!-- Left Panel: Document Content -->
             <section
                 class="qa-panel glass-panel flex flex-col overflow-hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none h-[60vh] lg:h-full min-h-[400px]">
-                <!-- Header of Left Panel -->
                 <div
                     class="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 flex-shrink-0">
                     <h2 class="text-lg font-bold flex items-center gap-2">
@@ -168,7 +160,6 @@
                         File</button>
                 </div>
 
-                <!-- Status/Title Bar -->
                 <div
                     class="px-6 py-3 border-b border-slate-100 dark:border-slate-800/50 flex items-center justify-between gap-3 bg-white dark:bg-slate-900 flex-shrink-0">
                     <div class="flex items-center gap-3 overflow-hidden w-full">
@@ -186,19 +177,15 @@
                     </div>
                 </div>
 
-                <!-- Text Scroll Area -->
                 <div class="flex-grow overflow-y-auto p-6 bg-slate-50/30 dark:bg-transparent">
                     <div id="extractedTextDisplay"
                         class="text-sm leading-relaxed whitespace-pre-wrap text-slate-700 dark:text-slate-200">
-                        <!-- Text appears here -->
                     </div>
                 </div>
             </section>
 
-            <!-- Right Panel: AI Chat -->
             <section
                 class="qa-panel glass-panel flex flex-col overflow-hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none h-[60vh] lg:h-full min-h-[400px] relative">
-                <!-- Header of Right Panel -->
                 <div
                     class="pl-6 pr-6 py-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 flex-shrink-0">
                     <h2 class="text-lg font-bold flex items-center gap-2">
@@ -227,7 +214,6 @@
                     </div>
                 </div>
 
-                <!-- Chat Scroll Area -->
                 <div id="chatHistory" class="flex-grow overflow-y-auto p-6 flex flex-col gap-6">
                     <div
                         class="custom-ai-bubble bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm p-4 rounded-2xl rounded-tl-sm text-slate-800 dark:text-slate-100 self-start max-w-[95%] text-sm leading-relaxed">
@@ -235,7 +221,6 @@
                     </div>
                 </div>
 
-                <!-- Suggested Questions Header -->
                 <div
                     class="px-5 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900 flex gap-2 overflow-x-auto whitespace-nowrap hide-scrollbar flex-shrink-0">
                     <button onclick="window.askSuggested('Summarize this document')"
@@ -249,7 +234,6 @@
                         dates</button>
                 </div>
 
-                <!-- Input Form -->
                 <div
                     class="p-4 border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900 flex-shrink-0">
                     <form id="questionForm" class="flex gap-3">
@@ -275,7 +259,6 @@
         </div>
     </main>
 
-    <!-- Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 

@@ -1,5 +1,3 @@
-// --- GLOBAL UTILITIES ---
-
 window.displayStatus = function (message, type = 'warning') {
     const badge = document.getElementById('headerStatusMessage');
     if (!badge) return;
@@ -26,7 +24,6 @@ window.switchScreen = function (targetId) {
         qaScreen.classList.add('hidden');
         initialScreen.classList.remove('hidden');
 
-        // Reset state
         if (window.toggleChatInputs) window.toggleChatInputs(false);
         const extractedTextDisplay = document.getElementById('extractedTextDisplay');
         if (extractedTextDisplay) extractedTextDisplay.innerHTML = '<p class="text-gray-400 italic">Extracted text will appear here.</p>';
@@ -51,7 +48,7 @@ window.saveChat = function () {
 
     const bubbles = chatHistory.querySelectorAll('div > .ai-response, div > .user-query, .custom-ai-bubble, .ai-response, .user-query');
     bubbles.forEach(bubble => {
-        if (bubble.id === 'aiPlaceholder') return; // Skip thinking indicator
+        if (bubble.id === 'aiPlaceholder') return;
         const isUser = bubble.classList.contains('user-query');
         const role = isUser ? 'You' : 'DocuQuery AI';
         chatText += `${role}:\n${bubble.innerText.trim()}\n\n`;
@@ -68,26 +65,19 @@ window.saveChat = function () {
     URL.revokeObjectURL(url);
 };
 
-// --- CONFIGURATION ---
-
-const MODEL = 'meta-llama/llama-3-8b-instruct';
+const MODEL = 'meta-llama/llama-3.1-8b-instruct';
 const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:')
     ? 'http://localhost:3000/api/generate'
     : 'https://docuquery-b68i.onrender.com/api/generate';
-
-// --- STATE ---
 
 let extractedText = null;
 let getDocument;
 let mammoth;
 
-// Element references
 let fileInputHidden, dropZone, dropZoneStatus, initialScreen, qaScreen, documentFileName;
 let questionForm, questionInput, submitQuestionButton, chatHistory, extractedTextDisplay;
 let loadingIndicator, chatLoading, sendIcon;
 let themeToggle, sunIcon, moonIcon;
-
-// --- UTILITY FUNCTIONS ---
 
 function applyTheme(isDark) {
     if (isDark) {
@@ -119,7 +109,7 @@ function displayDropZoneStatus(message, type) {
         targetClasses += 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-900/30 dark:border-indigo-800 dark:text-indigo-300 animate-pulse';
     } else if (type === 'error') {
         targetClasses += 'bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-900/30 dark:border-rose-800 dark:text-rose-300 transform scale-[1.02] shadow-md border-2';
-        message = `⚠️ ${message}`; // Prepend alert icon
+        message = `⚠️ ${message}`;
     } else {
         dropZoneStatus.className = 'hidden';
         dropZoneStatus.textContent = '';
@@ -206,8 +196,6 @@ function toggleFileLoading(isLoading) {
     loadingIndicator.classList.toggle('hidden', !isLoading);
 }
 
-// --- EXTRACTION ---
-
 async function extractDocxText(file) {
     if (!mammoth) throw new Error("Mammoth.js not loaded.");
     const buffer = await file.arrayBuffer();
@@ -229,11 +217,9 @@ async function extractPdfText(file) {
         let text = '';
 
         for (let item of textContent.items) {
-            // If the absolute Y coordinate changes by more than 5 points, assume it's a new line.
             if (lastY !== null && Math.abs(item.transform[5] - lastY) > 4) {
                 text += '\n';
             } else if (lastY !== null && text.length > 0 && !text.endsWith(' ') && !text.endsWith('\n')) {
-                // Add a space between words on the same line if they don't already touch
                 text += ' ';
             }
             text += item.str;
@@ -243,7 +229,6 @@ async function extractPdfText(file) {
             lastY = item.transform[5];
         }
 
-        // Clean up formatting
         text = text.replace(/ +/g, ' ').replace(/\n /g, '\n');
         fullText += text + '\n\n';
     }
@@ -255,10 +240,8 @@ async function extractPptxText(file) {
     const zip = await window.JSZip.loadAsync(file);
     let fullText = '';
 
-    // Find all slides
     const slideFiles = Object.keys(zip.files).filter(name => name.startsWith('ppt/slides/slide') && name.endsWith('.xml'));
 
-    // Process slides in order
     slideFiles.sort((a, b) => {
         const numA = parseInt(a.match(/slide(\d+)\.xml/)[1]);
         const numB = parseInt(b.match(/slide(\d+)\.xml/)[1]);
@@ -280,7 +263,6 @@ async function extractPptxText(file) {
 
 async function extractRtfText(file) {
     const text = await file.text();
-    // Basic RTF strip regex
     return text.replace(/\\([a-z]{1,32})(-?\d+)? ?/gi, ' ').replace(/[{}]/g, '').trim();
 }
 
@@ -369,7 +351,6 @@ async function processFile(file) {
     } catch (error) {
         console.error('Extraction Error:', error);
 
-        // Fulfill UX expectation: transition to QA Screen but display central empty-state natively inside the preview container
         extractedText = "";
         documentFileName.textContent = file.name;
         extractedTextDisplay.innerHTML = `
@@ -384,7 +365,6 @@ async function processFile(file) {
         window.displayStatus(`Failed`, 'error');
         window.toggleChatInputs(false);
 
-        // Add one initial AI bubble explaining the limitation
         chatHistory.innerHTML = '';
         addChatMessage("I see you selected a document, but I am unable to read any text from it because it appears to be composed entirely of images or scans. Please upload a standard text document if you would like me to analyze it.", "ai");
 
@@ -392,8 +372,6 @@ async function processFile(file) {
         toggleFileLoading(false);
     }
 }
-
-// --- API ---
 
 async function callGeminiApi(userQuery) {
     const modeToggle = document.getElementById('modeToggle');
@@ -444,8 +422,6 @@ ${extractedText}
     }
 }
 
-// --- EVENT HANDLERS ---
-
 async function handleAskQuestion(e) {
     e.preventDefault();
     const query = questionInput.value.trim();
@@ -477,16 +453,13 @@ function setupEventListeners() {
     themeToggle = document.getElementById('themeToggle');
     [sunIcon, moonIcon] = [document.getElementById('sunIcon'), document.getElementById('moonIcon')];
 
-    // Theme setup
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     applyTheme(savedTheme === 'dark' || (!savedTheme && prefersDark));
     themeToggle.addEventListener('click', toggleTheme);
 
-    // Initial Screen
     window.switchScreen('initialScreen');
 
-    // PDF.js
     import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs').then(m => {
         getDocument = m.getDocument;
         m.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
@@ -494,12 +467,10 @@ function setupEventListeners() {
 
     mammoth = window.mammoth;
 
-    // Listeners
     fileInputHidden.addEventListener('change', () => {
         if (fileInputHidden.files[0]) processFile(fileInputHidden.files[0]);
     });
 
-    // Global Drag & Drop Overlay Logic
     let dragCounter = 0;
     const overlay = document.getElementById('globalDragOverlay');
 

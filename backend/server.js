@@ -4,8 +4,6 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ----- CORS -----
-// Full CORS support to allow requests from static frontends
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -23,7 +21,6 @@ if (!process.env.OPENROUTER_API_KEY) {
   console.warn('Warning: OPENROUTER_API_KEY is not set. The proxy will fail without it.');
 }
 
-// ----- Optional Diagnostics -----
 app.get('/', (req, res) => {
   res.send('DocuQuery backend is running. Use POST /api/generate');
 });
@@ -32,7 +29,6 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
-// Block GET on generate
 app.get('/api/generate', (req, res) => {
   res.status(405).json({
     error: 'Method Not Allowed',
@@ -40,11 +36,10 @@ app.get('/api/generate', (req, res) => {
   });
 });
 
-// ----- MAIN API -----
 app.post('/api/generate', async (req, res) => {
   try {
     const { userQuery, systemPrompt, extractedText, model } = req.body || {};
-    const MODEL = model || 'meta-llama/llama-3-8b-instruct';
+    const MODEL = model || 'meta-llama/llama-3.1-8b-instruct';
 
     if (!process.env.OPENROUTER_API_KEY) {
       return res.status(500).json({ error: 'Server misconfiguration: OPENROUTER_API_KEY not set.' });
@@ -58,7 +53,6 @@ app.post('/api/generate', async (req, res) => {
       ]
     };
 
-    // ----- Call OpenRouter -----
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
